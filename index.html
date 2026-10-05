@@ -1,0 +1,1888 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THE CLOSET — My Film Collection</title>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+    }
+  }
+  </script>
+  <style>
+    :root {
+      --cream: #f1e7d5;
+      --ink: #17120d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #15100b;
+      color: var(--cream);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    button, input {
+      font: inherit;
+    }
+
+    #app {
+      position: fixed;
+      inset: 0;
+      background: #15100b;
+    }
+
+    #scene {
+      position: absolute;
+      inset: 0;
+      cursor: grab;
+    }
+
+    #scene.dragging {
+      cursor: grabbing;
+    }
+
+    .topbar {
+      position: fixed;
+      z-index: 20;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 76px;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+
+    .brand {
+      pointer-events: auto;
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      color: #f7eddb;
+      text-shadow: 0 2px 14px rgba(0,0,0,.55);
+      letter-spacing: .16em;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .brand span {
+      opacity: .58;
+      font-size: 9px;
+      letter-spacing: .12em;
+      font-weight: 400;
+    }
+
+    .toolbar {
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .tool {
+      height: 36px;
+      padding: 0 12px;
+      border: 1px solid rgba(255,255,255,.2);
+      background: rgba(27,20,14,.62);
+      color: #f0e5d3;
+      backdrop-filter: blur(10px);
+      cursor: pointer;
+      font-size: 11px;
+      letter-spacing: .06em;
+      transition: .2s;
+    }
+
+    .tool:hover {
+      background: rgba(255,255,255,.12);
+      border-color: rgba(255,255,255,.4);
+    }
+
+    .tool.active {
+      background: #eadbc3;
+      color: #19130e;
+      border-color: #eadbc3;
+    }
+
+    #searchWrap {
+      position: fixed;
+      z-index: 30;
+      top: 72px;
+      left: 24px;
+      width: min(370px, calc(100vw - 48px));
+      transform: translateY(-10px);
+      opacity: 0;
+      pointer-events: none;
+      transition: .2s ease;
+    }
+
+    #searchWrap.open {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #search {
+      width: 100%;
+      height: 42px;
+      border: 1px solid rgba(255,255,255,.22);
+      outline: none;
+      background: rgba(25,19,14,.94);
+      color: #f4ead9;
+      padding: 0 14px;
+      backdrop-filter: blur(12px);
+      font-size: 12px;
+    }
+
+    #search::placeholder {
+      color: #8e8171;
+    }
+
+    #listView {
+      position: fixed;
+      z-index: 15;
+      inset: 76px 0 0;
+      padding: 22px 28px 80px;
+      overflow: auto;
+      background:
+        radial-gradient(circle at 50% 0%, #55432f 0, #251b13 35%, #110d09 78%);
+      display: none;
+    }
+
+    #listView.visible {
+      display: block;
+    }
+
+    .listHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      max-width: 1300px;
+      margin: 0 auto 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255,255,255,.16);
+    }
+
+    .listHeader h1 {
+      margin: 0;
+      font-size: 25px;
+      font-weight: 400;
+      letter-spacing: .04em;
+    }
+
+    .listHeader p {
+      margin: 0;
+      color: #a39480;
+      font-size: 10px;
+      letter-spacing: .1em;
+    }
+
+    .filmGrid {
+      max-width: 1300px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 2px;
+    }
+
+    .filmRow {
+      min-height: 115px;
+      padding: 15px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.035);
+      cursor: pointer;
+      display: flex;
+      gap: 13px;
+      transition: .2s;
+    }
+
+    .filmRow:hover {
+      background: rgba(255,255,255,.09);
+      transform: translateY(-2px);
+    }
+
+    .miniSpine {
+      width: 28px;
+      min-width: 28px;
+      height: 82px;
+      color: #f4ead9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: inset -2px 0 3px rgba(0,0,0,.25);
+      padding-top: 5px;
+    }
+
+    .miniSpine b {
+      font-size: 7px;
+      margin-bottom: 5px;
+    }
+
+    .miniSpine span {
+      writing-mode: vertical-rl;
+      font-size: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-height: 60px;
+    }
+
+    .rowText {
+      min-width: 0;
+    }
+
+    .rowText strong {
+      display: block;
+      color: #f0e4d1;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .rowText small {
+      display: block;
+      color: #978a79;
+      font-size: 9px;
+      line-height: 1.7;
+    }
+
+    #tooltip {
+      position: fixed;
+      z-index: 50;
+      left: 50%;
+      bottom: 27px;
+      transform: translateX(-50%) translateY(12px);
+      min-width: 260px;
+      max-width: calc(100vw - 30px);
+      padding: 12px 15px;
+      background: rgba(22,16,11,.95);
+      border: 1px solid rgba(255,255,255,.17);
+      box-shadow: 0 12px 35px rgba(0,0,0,.35);
+      backdrop-filter: blur(12px);
+      opacity: 0;
+      pointer-events: none;
+      transition: .15s;
+      text-align: center;
+    }
+
+    #tooltip.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    #tooltip .tipTitle {
+      color: #f4e9d7;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    #tooltip .tipMeta {
+      color: #9d8e7b;
+      font-size: 9px;
+      letter-spacing: .05em;
+    }
+
+    #detail {
+      position: fixed;
+      z-index: 40;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(430px, 88vw);
+      padding: 70px 36px 38px;
+      background:
+        linear-gradient(90deg, rgba(31,22,15,.18), rgba(21,15,10,.98) 12%);
+      border-left: 1px solid rgba(255,255,255,.1);
+      transform: translateX(100%);
+      transition: transform .35s cubic-bezier(.22,.8,.24,1);
+      overflow-y: auto;
+    }
+
+    #detail.open {
+      transform: translateX(0);
+    }
+
+    #closeDetail {
+      position: absolute;
+      right: 22px;
+      top: 22px;
+      border: 0;
+      background: transparent;
+      color: #a99b88;
+      font-size: 23px;
+      cursor: pointer;
+      width: 34px;
+      height: 34px;
+    }
+
+    .detailNumber {
+      color: #958775;
+      font-size: 10px;
+      letter-spacing: .18em;
+      margin-bottom: 16px;
+    }
+
+    .detailTitle {
+      margin: 0;
+      color: #f5ead8;
+      font-size: clamp(28px, 4vw, 43px);
+      font-weight: 400;
+      line-height: 1.08;
+      letter-spacing: -.02em;
+    }
+
+    .detailOriginal {
+      color: #978976;
+      margin-top: 10px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .rule {
+      height: 1px;
+      background: rgba(255,255,255,.14);
+      margin: 26px 0;
+    }
+
+    .detailMeta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 17px 20px;
+    }
+
+    .metaLabel {
+      color: #827665;
+      font-size: 8px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .metaValue {
+      color: #dfd3c1;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .rating {
+      color: #dfb66e;
+      font-size: 18px;
+      letter-spacing: 2px;
+      white-space: nowrap;
+    }
+
+    .rating .half {
+      position: relative;
+      display: inline-block;
+      width: .5em;
+      overflow: hidden;
+      vertical-align: bottom;
+    }
+
+    .noteLabel {
+      color: #827665;
+      font-size: 8px;
+      letter-spacing: .16em;
+      margin-bottom: 8px;
+    }
+
+    .note {
+      color: #d2c5b3;
+      font-size: 14px;
+      line-height: 1.75;
+      font-family: Georgia, serif;
+    }
+
+    .tmdb {
+      display: inline-flex;
+      margin-top: 26px;
+      padding: 10px 13px;
+      border: 1px solid rgba(255,255,255,.16);
+      color: #d8ccb9;
+      text-decoration: none;
+      font-size: 9px;
+      letter-spacing: .12em;
+      transition: .2s;
+    }
+
+    .tmdb:hover {
+      border-color: #c9a568;
+      color: #f0d9ad;
+    }
+
+    .hint {
+      position: fixed;
+      z-index: 10;
+      bottom: 18px;
+      left: 22px;
+      color: rgba(235,220,197,.45);
+      font-size: 8px;
+      letter-spacing: .08em;
+      pointer-events: none;
+    }
+
+    #loading {
+      position: fixed;
+      z-index: 100;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: #15100b;
+      color: #d9c8ad;
+      font-size: 11px;
+      letter-spacing: .2em;
+      transition: opacity .5s;
+    }
+
+    #loading.done {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @media (max-width: 700px) {
+      .topbar {
+        padding: 13px;
+        height: 64px;
+      }
+
+      .brand {
+        font-size: 10px;
+      }
+
+      .toolbar {
+        gap: 4px;
+      }
+
+      .tool {
+        padding: 0 8px;
+        font-size: 9px;
+      }
+
+      #searchWrap {
+        top: 62px;
+        left: 13px;
+        width: calc(100vw - 26px);
+      }
+
+      #detail {
+        width: 94vw;
+        padding: 65px 25px 30px;
+      }
+
+      .hint {
+        display: none;
+      }
+
+      .filmGrid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="loading">SHELVING THE COLLECTION</div>
+    <div id="scene"></div>
+
+    <header class="topbar">
+      <div class="brand">THE CLOSET <span id="count">0 FILMS</span></div>
+      <div class="toolbar">
+        <button class="tool" id="searchBtn">⌕ 검색</button>
+        <button class="tool" id="randomBtn">↝ 무작위로 꺼내기</button>
+        <button class="tool active" id="closetBtn">클로짓 보기</button>
+        <button class="tool" id="listBtn">목록 보기</button>
+      </div>
+    </header>
+
+    <div id="searchWrap">
+      <input id="search" type="search" placeholder="제목, 감독, 번호 검색">
+    </div>
+
+    <div id="tooltip">
+      <div class="tipTitle"></div>
+      <div class="tipMeta"></div>
+    </div>
+
+    <div class="hint">DRAG TO LOOK AROUND · CLICK A SPINE TO PULL IT OUT</div>
+
+    <section id="listView">
+      <div class="listHeader">
+        <div>
+          <h1>My Film Closet</h1>
+        </div>
+        <p id="listCount"></p>
+      </div>
+      <div class="filmGrid" id="filmGrid"></div>
+    </section>
+
+    <aside id="detail">
+      <button id="closeDetail" aria-label="닫기">×</button>
+      <div class="detailNumber" id="detailNumber"></div>
+      <h2 class="detailTitle" id="detailTitle"></h2>
+      <div class="detailOriginal" id="detailOriginal"></div>
+      <div class="rule"></div>
+      <div class="detailMeta">
+        <div>
+          <div class="metaLabel">Director</div>
+          <div class="metaValue" id="detailDirector"></div>
+        </div>
+        <div>
+          <div class="metaLabel">Year</div>
+          <div class="metaValue" id="detailYear"></div>
+        </div>
+        <div>
+          <div class="metaLabel">Country</div>
+          <div class="metaValue" id="detailCountry"></div>
+        </div>
+        <div>
+          <div class="metaLabel">Runtime</div>
+          <div class="metaValue" id="detailRuntime"></div>
+        </div>
+        <div>
+          <div class="metaLabel">Genres</div>
+          <div class="metaValue" id="detailGenres"></div>
+        </div>
+        <div>
+          <div class="metaLabel">My Rating</div>
+          <div class="rating" id="detailRating"></div>
+        </div>
+      </div>
+      <div class="rule"></div>
+      <div class="noteLabel">NOTE</div>
+      <div class="note" id="detailNote"></div>
+      <a class="tmdb" id="detailTmdb" href="#" target="_blank" rel="noopener noreferrer">VIEW ON TMDB ↗</a>
+    </aside>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    const sceneRoot = document.getElementById('scene');
+    const loading = document.getElementById('loading');
+    const countEl = document.getElementById('count');
+    const tooltip = document.getElementById('tooltip');
+    const detail = document.getElementById('detail');
+    const listView = document.getElementById('listView');
+    const filmGrid = document.getElementById('filmGrid');
+    const listCount = document.getElementById('listCount');
+    const searchWrap = document.getElementById('searchWrap');
+    const searchInput = document.getElementById('search');
+
+    let films = [];
+    let filteredFilms = [];
+    let selected = null;
+    let interactiveSpines = [];
+
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      powerPreference: 'high-performance'
+    });
+
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.4;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    sceneRoot.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x25180f);
+    scene.fog = new THREE.Fog(0x25180f, 11, 23);
+
+    const camera = new THREE.PerspectiveCamera(
+      49,
+      window.innerWidth / window.innerHeight,
+      0.05,
+      100
+    );
+
+    camera.position.set(0, 2.25, 4.35);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = .075;
+    controls.enablePan = false;
+    controls.minDistance = 3.8;
+    controls.maxDistance = 5.8;
+    controls.minPolarAngle = Math.PI * .40;
+    controls.maxPolarAngle = Math.PI * .60;
+    controls.target.set(0, 2.45, -1.0);
+    controls.rotateSpeed = -.42;
+
+    const ambient = new THREE.HemisphereLight(
+      0xffe9c5,
+      0x4a2c1c,
+      2.4
+    );
+    scene.add(ambient);
+
+    const ceilingLight = new THREE.PointLight(
+      0xffd28f,
+      45,
+      14,
+      1.7
+    );
+    ceilingLight.position.set(0, 5.0, .8);
+    ceilingLight.castShadow = true;
+    ceilingLight.shadow.mapSize.set(1024, 1024);
+    scene.add(ceilingLight);
+
+    const frontWarm = new THREE.PointLight(
+      0xffc47b,
+      34,
+      11,
+      1.8
+    );
+    frontWarm.position.set(0, 3.2, 3.4);
+    scene.add(frontWarm);
+
+    const leftLight = new THREE.PointLight(
+      0xffbd72,
+      25,
+      10,
+      1.8
+    );
+    leftLight.position.set(-4, 3.1, 1.4);
+    scene.add(leftLight);
+
+    const rightLight = new THREE.PointLight(
+      0xffc47c,
+      24,
+      10,
+      1.8
+    );
+    rightLight.position.set(4, 3.2, 1.4);
+    scene.add(rightLight);
+
+    const closet = new THREE.Group();
+    scene.add(closet);
+
+    const wallMat = new THREE.MeshStandardMaterial({
+      color: 0x4b3020,
+      roughness: .96
+    });
+
+    const floorMat = new THREE.MeshStandardMaterial({
+      color: 0x644027,
+      roughness: .86
+    });
+
+    const wood = new THREE.MeshStandardMaterial({
+      color: 0x704326,
+      roughness: .72
+    });
+
+    const woodHighlight = new THREE.MeshStandardMaterial({
+      color: 0x895634,
+      roughness: .68
+    });
+
+    const woodDark = new THREE.MeshStandardMaterial({
+      color: 0x3e2416,
+      roughness: .86
+    });
+
+    function createBox(w, h, d, material, x, y, z) {
+      const mesh = new THREE.Mesh(
+        new THREE.BoxGeometry(w, h, d),
+        material
+      );
+
+      mesh.position.set(x, y, z);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      closet.add(mesh);
+
+      return mesh;
+    }
+
+    createBox(11.5, 6.2, .18, wallMat, 0, 3.0, -3.25);
+
+    createBox(11.5, .18, 7.8, floorMat, 0, -.09, .3);
+
+    createBox(.18, 6.2, 7.8, wallMat, -5.6, 3.0, .3);
+    createBox(.18, 6.2, 7.8, wallMat, 5.6, 3.0, .3);
+
+    const frontShelfLevels = [
+      .14,
+      1.10,
+      2.06,
+      3.02,
+      3.98,
+      4.94
+    ];
+
+    frontShelfLevels.forEach((y, i) => {
+      createBox(
+        10.95,
+        .13,
+        .62,
+        i === 3 ? woodHighlight : wood,
+        0,
+        y,
+        -2.88
+      );
+    });
+
+    frontShelfLevels.forEach(y => {
+      createBox(.22, .98, .62, woodDark, -5.38, y + .49, -2.88);
+      createBox(.22, .98, .62, woodDark, 5.38, y + .49, -2.88);
+    });
+
+    for (let i = 0; i < 18; i++) {
+      const x = -5.1 + i * .6;
+
+      createBox(
+        .035,
+        5.05,
+        .035,
+        woodHighlight,
+        x,
+        2.58,
+        -3.17
+      );
+    }
+
+    frontShelfLevels.forEach(y => {
+      createBox(.58, .13, 6.05, wood, -5.22, y, 0);
+      createBox(.58, .13, 6.05, wood, 5.22, y, 0);
+    });
+
+    createBox(11.2, .24, .72, woodDark, 0, 5.48, -2.88);
+    createBox(.72, .24, 6.35, woodDark, -5.22, 5.48, 0);
+    createBox(.72, .24, 6.35, woodDark, 5.22, 5.48, 0);
+
+    const spineGroup = new THREE.Group();
+    closet.add(spineGroup);
+
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    const emptyColors = [
+      '#292421',
+      '#332a25',
+      '#403129',
+      '#30282a',
+      '#3d3026',
+      '#282c2a',
+      '#3b2927',
+      '#34312b',
+      '#42352b',
+      '#2c3032',
+      '#382d31',
+      '#45372b',
+      '#2e2924',
+      '#3a302a',
+      '#33352e',
+      '#402f24'
+    ];
+
+    function materialFromColor(hex) {
+      return new THREE.MeshStandardMaterial({
+        color: new THREE.Color(hex || '#514238'),
+        roughness: .74,
+        metalness: .03
+      });
+    }
+
+    function makeTextTexture(text, options = {}) {
+      const canvas = document.createElement('canvas');
+
+      canvas.width = options.width || 1024;
+      canvas.height = options.height || 2048;
+
+      const ctx = canvas.getContext('2d');
+
+      ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.imageSmoothingEnabled = true;
+
+      const fontFamily =
+        'Arial, "Noto Sans KR", "Malgun Gothic", sans-serif';
+
+      if (options.vertical) {
+        ctx.save();
+
+        ctx.translate(
+          canvas.width / 2,
+          canvas.height / 2
+        );
+
+        ctx.rotate(Math.PI / 2);
+
+        let size =
+          options.fontSize || 92;
+
+        const maxWidth =
+          canvas.height * .91;
+
+        ctx.font =
+          `${options.weight || 900} ${size}px ${fontFamily}`;
+
+        while (
+          ctx.measureText(text).width > maxWidth &&
+          size > 24
+        ) {
+          size -= 2;
+
+          ctx.font =
+            `${options.weight || 900} ${size}px ${fontFamily}`;
+        }
+
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle =
+          'rgba(0,0,0,.65)';
+        ctx.lineWidth =
+          Math.max(5, size * .055);
+
+        ctx.strokeText(
+          text,
+          0,
+          0
+        );
+
+        ctx.fillStyle =
+          options.color || '#fff8e8';
+
+        ctx.fillText(
+          text,
+          0,
+          0
+        );
+
+        ctx.restore();
+      } else {
+        let size =
+          options.fontSize || 72;
+
+        const maxWidth =
+          canvas.width * .92;
+
+        ctx.font =
+          `${options.weight || 900} ${size}px ${fontFamily}`;
+
+        while (
+          ctx.measureText(text).width > maxWidth &&
+          size > 18
+        ) {
+          size -= 2;
+
+          ctx.font =
+            `${options.weight || 900} ${size}px ${fontFamily}`;
+        }
+
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle =
+          'rgba(0,0,0,.72)';
+        ctx.lineWidth =
+          Math.max(5, size * .06);
+
+        ctx.strokeText(
+          text,
+          canvas.width / 2,
+          canvas.height / 2
+        );
+
+        ctx.fillStyle =
+          options.color || '#fff8e8';
+
+        ctx.fillText(
+          text,
+          canvas.width / 2,
+          canvas.height / 2
+        );
+      }
+
+      const texture =
+        new THREE.CanvasTexture(canvas);
+
+      texture.colorSpace =
+        THREE.SRGBColorSpace;
+
+      texture.anisotropy =
+        renderer.capabilities.getMaxAnisotropy();
+
+      texture.minFilter =
+        THREE.LinearMipmapLinearFilter;
+
+      texture.magFilter =
+        THREE.LinearFilter;
+
+      texture.generateMipmaps = true;
+
+      return texture;
+    }
+
+    function addSpineText(group, film, w, h, d) {
+      const badgeTexture =
+        makeTextTexture(
+          `#${String(film.id).padStart(3, '0')}`,
+          {
+            width: 1536,
+            height: 384,
+            fontSize: 150,
+            weight: 900,
+            color: '#fff8e8'
+          }
+        );
+
+      const badge =
+        new THREE.Mesh(
+          new THREE.PlaneGeometry(
+            w * .98,
+            .24
+          ),
+          new THREE.MeshBasicMaterial({
+            map: badgeTexture,
+            transparent: true,
+            depthWrite: false,
+            toneMapped: false
+          })
+        );
+
+      badge.position.set(
+        0,
+        h * .365,
+        d / 2 + .016
+      );
+
+      group.add(badge);
+
+      const titleTexture =
+        makeTextTexture(
+          film.title || '',
+          {
+            width: 1536,
+            height: 3072,
+            fontSize: 180,
+            vertical: true,
+            weight: 900,
+            color: '#fff8e8'
+          }
+        );
+
+      const title =
+        new THREE.Mesh(
+          new THREE.PlaneGeometry(
+            w * .94,
+            h * .74
+          ),
+          new THREE.MeshBasicMaterial({
+            map: titleTexture,
+            transparent: true,
+            depthWrite: false,
+            toneMapped: false
+          })
+        );
+
+      title.position.set(
+        0,
+        -.08,
+        d / 2 + .016
+      );
+
+      group.add(title);
+    }
+
+    function createSpine(film, x, y, index) {
+      const w = film ? .48 : .30;
+      const h = film ? .94 : .84;
+      const d = .50;
+
+      const group = new THREE.Group();
+
+      group.position.set(
+        x,
+        y + h / 2 + .08,
+        -2.53
+      );
+
+      const color =
+        film
+          ? film.color
+          : emptyColors[index % emptyColors.length];
+
+      const body =
+        new THREE.Mesh(
+          new THREE.BoxGeometry(
+            w,
+            h,
+            d
+          ),
+          materialFromColor(color)
+        );
+
+      body.castShadow = true;
+      body.receiveShadow = true;
+
+      group.add(body);
+
+      const edgeMaterial =
+        new THREE.MeshStandardMaterial({
+          color: new THREE.Color(color).offsetHSL(0, 0, .13),
+          roughness: .72
+        });
+
+      const edge =
+        new THREE.Mesh(
+          new THREE.BoxGeometry(
+            .026,
+            h * .94,
+            .015
+          ),
+          edgeMaterial
+        );
+
+      edge.position.set(
+        -w / 2 + .017,
+        0,
+        d / 2 + .014
+      );
+
+      group.add(edge);
+
+      if (film) {
+        addSpineText(
+          group,
+          film,
+          w,
+          h,
+          d
+        );
+
+        group.userData.film = film;
+        group.userData.basePosition =
+          group.position.clone();
+
+        interactiveSpines.push(group);
+      }
+
+      spineGroup.add(group);
+
+      return group;
+    }
+
+    function populateCloset(data) {
+      interactiveSpines = [];
+
+      while (spineGroup.children.length) {
+        spineGroup.remove(
+          spineGroup.children[0]
+        );
+      }
+
+      const y =
+        frontShelfLevels[3];
+
+      const filmWidth = .48;
+      const filmGap = 0;
+      const availableWidth = 8.0;
+
+      const maxFilms =
+        Math.floor(
+          availableWidth / filmWidth
+        );
+
+      const visibleFilms =
+        data.slice(0, maxFilms);
+
+      const actualWidth =
+        visibleFilms.length *
+        (filmWidth + filmGap);
+
+      const startX =
+        -actualWidth / 2 +
+        filmWidth / 2;
+
+      visibleFilms.forEach(
+        (film, index) => {
+          const x =
+            startX +
+            index *
+            (filmWidth + filmGap);
+
+          createSpine(
+            film,
+            x,
+            y,
+            index
+          );
+        }
+      );
+
+      const fillerY = [
+        frontShelfLevels[0],
+        frontShelfLevels[1],
+        frontShelfLevels[2],
+        frontShelfLevels[4],
+        frontShelfLevels[5]
+      ];
+
+      fillerY.forEach(
+        (levelY, levelIndex) => {
+          const fillerWidth = .27;
+          const fillerCount = 38;
+
+          for (
+            let i = 0;
+            i < fillerCount;
+            i++
+          ) {
+            const x =
+              -5.03 +
+              i * fillerWidth;
+
+            createSpine(
+              null,
+              x,
+              levelY,
+              i +
+              levelIndex *
+              fillerCount
+            );
+          }
+        }
+      );
+
+      for (let i = 0; i < 22; i++) {
+        const z =
+          -2.65 +
+          i * .28;
+
+        createSideCase(
+          -5.02,
+          z,
+          i
+        );
+
+        createSideCase(
+          5.02,
+          z,
+          i + 22
+        );
+      }
+    }
+
+    function createSideCase(x, z, index) {
+      const h = .84;
+      const w = .34;
+      const d = .48;
+
+      const group =
+        new THREE.Group();
+
+      group.position.set(
+        x,
+        0,
+        z
+      );
+
+      const color =
+        emptyColors[
+          index %
+          emptyColors.length
+        ];
+
+      const body =
+        new THREE.Mesh(
+          new THREE.BoxGeometry(
+            w,
+            h,
+            d
+          ),
+          materialFromColor(color)
+        );
+
+      body.position.y = 2.55;
+      body.castShadow = true;
+      body.receiveShadow = true;
+
+      group.add(body);
+      spineGroup.add(group);
+    }
+
+    function ratingHTML(value) {
+      const n = Number(value) || 0;
+      let html = '';
+
+      for (let i = 1; i <= 5; i++) {
+        if (n >= i) {
+          html += '★';
+        } else if (n >= i - .5) {
+          html += '<span class="half">★</span>';
+        } else {
+          html += '☆';
+        }
+      }
+
+      return html;
+    }
+
+    function openDetail(film) {
+      selected = film;
+
+      document.getElementById('detailNumber').textContent =
+        `#${String(film.id).padStart(3, '0')}`;
+
+      document.getElementById('detailTitle').textContent =
+        film.title || '';
+
+      document.getElementById('detailOriginal').textContent =
+        film.original || '';
+
+      document.getElementById('detailDirector').textContent =
+        film.director || '';
+
+      document.getElementById('detailYear').textContent =
+        film.year ?? '';
+
+      document.getElementById('detailCountry').textContent =
+        film.country || '';
+
+      document.getElementById('detailRuntime').textContent =
+        film.runtime ? `${film.runtime} min` : '';
+
+      document.getElementById('detailGenres').textContent =
+        Array.isArray(film.genres)
+          ? film.genres.join(' · ')
+          : '';
+
+      document.getElementById('detailRating').innerHTML =
+        ratingHTML(film.rating);
+
+      document.getElementById('detailNote').textContent =
+        film.note || '';
+
+      const tmdb =
+        document.getElementById('detailTmdb');
+
+      tmdb.href =
+        film.tmdb || '#';
+
+      tmdb.style.display =
+        film.tmdb ? 'inline-flex' : 'none';
+
+      detail.classList.add('open');
+
+      const spine =
+        interactiveSpines.find(
+          s =>
+            s.userData.film &&
+            s.userData.film.id === film.id
+        );
+
+      if (spine) {
+        const target =
+          spine.userData.basePosition.clone();
+
+        target.z += .62;
+
+        animateSpine(
+          spine,
+          target,
+          .48
+        );
+      }
+    }
+
+    function closeDetail() {
+      detail.classList.remove('open');
+
+      if (selected) {
+        const spine =
+          interactiveSpines.find(
+            s =>
+              s.userData.film &&
+              s.userData.film.id === selected.id
+          );
+
+        if (spine) {
+          animateSpine(
+            spine,
+            spine.userData.basePosition,
+            .38
+          );
+        }
+      }
+
+      selected = null;
+    }
+
+    function animateSpine(spine, target, duration) {
+      const start =
+        spine.position.clone();
+
+      const startTime =
+        performance.now();
+
+      function tick(now) {
+        const t =
+          Math.min(
+            1,
+            (now - startTime) /
+            (duration * 1000)
+          );
+
+        const eased =
+          1 - Math.pow(1 - t, 3);
+
+        spine.position.lerpVectors(
+          start,
+          target,
+          eased
+        );
+
+        if (t < 1) {
+          requestAnimationFrame(tick);
+        }
+      }
+
+      requestAnimationFrame(tick);
+    }
+
+    function showTooltip(film) {
+      tooltip.querySelector('.tipTitle').textContent =
+        `#${String(film.id).padStart(3, '0')} · ${film.title || ''}`;
+
+      tooltip.querySelector('.tipMeta').textContent =
+        [
+          film.director,
+          film.year,
+          film.country
+        ]
+        .filter(Boolean)
+        .join(' · ');
+
+      tooltip.classList.add('show');
+    }
+
+    function hideTooltip() {
+      tooltip.classList.remove('show');
+    }
+
+    function updateList() {
+      filmGrid.innerHTML = '';
+
+      filteredFilms.forEach(
+        film => {
+          const row =
+            document.createElement('div');
+
+          row.className =
+            'filmRow';
+
+          const spine =
+            document.createElement('div');
+
+          spine.className =
+            'miniSpine';
+
+          spine.style.background =
+            film.color || '#332a24';
+
+          const number =
+            document.createElement('b');
+
+          number.textContent =
+            `#${String(film.id).padStart(3, '0')}`;
+
+          const title =
+            document.createElement('span');
+
+          title.textContent =
+            film.title || '';
+
+          spine.append(
+            number,
+            title
+          );
+
+          const text =
+            document.createElement('div');
+
+          text.className =
+            'rowText';
+
+          const strong =
+            document.createElement('strong');
+
+          strong.textContent =
+            film.title || '';
+
+          const small =
+            document.createElement('small');
+
+          small.textContent =
+            [
+              film.original,
+              film.director,
+              film.year,
+              film.country
+            ]
+            .filter(
+              v =>
+                v !== undefined &&
+                v !== ''
+            )
+            .join(' · ');
+
+          text.append(
+            strong,
+            small
+          );
+
+          row.append(
+            spine,
+            text
+          );
+
+          row.addEventListener(
+            'click',
+            () => {
+              setView('closet');
+              openDetail(film);
+            }
+          );
+
+          filmGrid.appendChild(row);
+        }
+      );
+
+      listCount.textContent =
+        `${filteredFilms.length} / ${films.length} FILMS`;
+    }
+
+    function setView(view) {
+      const closetBtn =
+        document.getElementById('closetBtn');
+
+      const listBtn =
+        document.getElementById('listBtn');
+
+      if (view === 'list') {
+        listView.classList.add('visible');
+        closetBtn.classList.remove('active');
+        listBtn.classList.add('active');
+      } else {
+        listView.classList.remove('visible');
+        closetBtn.classList.add('active');
+        listBtn.classList.remove('active');
+      }
+    }
+
+    function applySearch() {
+      const q =
+        searchInput.value
+          .trim()
+          .toLowerCase();
+
+      filteredFilms =
+        !q
+          ? [...films]
+          : films.filter(
+              film => {
+                const haystack =
+                  [
+                    film.id,
+                    film.title,
+                    film.original,
+                    film.director,
+                    film.year,
+                    film.country,
+                    ...(film.genres || [])
+                  ]
+                  .join(' ')
+                  .toLowerCase();
+
+                return haystack.includes(q);
+              }
+            );
+
+      updateList();
+
+      if (q) {
+        setView('list');
+      }
+    }
+
+    function randomFilm() {
+      if (!films.length) return;
+
+      const film =
+        films[
+          Math.floor(
+            Math.random() * films.length
+          )
+        ];
+
+      setView('closet');
+      closeDetail();
+
+      setTimeout(
+        () => openDetail(film),
+        80
+      );
+    }
+
+    function handlePointerMove(event) {
+      if (
+        listView.classList.contains('visible')
+      ) {
+        return;
+      }
+
+      const rect =
+        renderer.domElement.getBoundingClientRect();
+
+      mouse.x =
+        ((event.clientX - rect.left) /
+          rect.width) * 2 - 1;
+
+      mouse.y =
+        -((event.clientY - rect.top) /
+          rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(
+        mouse,
+        camera
+      );
+
+      const hits =
+        raycaster.intersectObjects(
+          interactiveSpines,
+          true
+        );
+
+      if (hits.length) {
+        let object =
+          hits[0].object;
+
+        while (
+          object &&
+          !object.userData.film
+        ) {
+          object =
+            object.parent;
+        }
+
+        if (
+          object &&
+          object.userData.film
+        ) {
+          showTooltip(
+            object.userData.film
+          );
+
+          renderer.domElement.style.cursor =
+            'pointer';
+
+          return;
+        }
+      }
+
+      hideTooltip();
+
+      renderer.domElement.style.cursor =
+        'grab';
+    }
+
+    function handleClick(event) {
+      if (
+        listView.classList.contains('visible')
+      ) {
+        return;
+      }
+
+      const rect =
+        renderer.domElement.getBoundingClientRect();
+
+      mouse.x =
+        ((event.clientX - rect.left) /
+          rect.width) * 2 - 1;
+
+      mouse.y =
+        -((event.clientY - rect.top) /
+          rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(
+        mouse,
+        camera
+      );
+
+      const hits =
+        raycaster.intersectObjects(
+          interactiveSpines,
+          true
+        );
+
+      if (!hits.length) return;
+
+      let object =
+        hits[0].object;
+
+      while (
+        object &&
+        !object.userData.film
+      ) {
+        object =
+          object.parent;
+      }
+
+      if (
+        object &&
+        object.userData.film
+      ) {
+        openDetail(
+          object.userData.film
+        );
+      }
+    }
+
+    function fitCamera() {
+      if (window.innerWidth < 700) {
+        camera.position.set(
+          0,
+          2.2,
+          4.85
+        );
+
+        controls.minDistance = 4.25;
+        controls.maxDistance = 6.5;
+      } else {
+        camera.position.set(
+          0,
+          2.25,
+          4.35
+        );
+
+        controls.minDistance = 3.8;
+        controls.maxDistance = 5.8;
+      }
+
+      controls.target.set(
+        0,
+        2.45,
+        -1.0
+      );
+
+      controls.update();
+    }
+
+    async function loadFilms() {
+      try {
+        const response =
+          await fetch(
+            './films.json',
+            {
+              cache: 'no-store'
+            }
+          );
+
+        if (!response.ok) {
+          throw new Error(
+            `films.json: ${response.status}`
+          );
+        }
+
+        const data =
+          await response.json();
+
+        if (!Array.isArray(data)) {
+          throw new Error(
+            'films.json must contain an array'
+          );
+        }
+
+        films =
+          data.filter(Boolean);
+
+        filteredFilms =
+          [...films];
+
+        countEl.textContent =
+          `${films.length} FILMS`;
+
+        populateCloset(films);
+        updateList();
+
+        loading.classList.add('done');
+      } catch (error) {
+        loading.textContent =
+          'films.json을 불러오지 못했습니다';
+
+        console.error(error);
+      }
+    }
+
+    document
+      .getElementById('searchBtn')
+      .addEventListener(
+        'click',
+        () => {
+          searchWrap.classList.toggle('open');
+
+          if (
+            searchWrap.classList.contains('open')
+          ) {
+            searchInput.focus();
+          } else {
+            searchInput.value = '';
+            applySearch();
+          }
+        }
+      );
+
+    document
+      .getElementById('randomBtn')
+      .addEventListener(
+        'click',
+        randomFilm
+      );
+
+    document
+      .getElementById('closetBtn')
+      .addEventListener(
+        'click',
+        () => {
+          setView('closet');
+        }
+      );
+
+    document
+      .getElementById('listBtn')
+      .addEventListener(
+        'click',
+        () => {
+          setView('list');
+          updateList();
+        }
+      );
+
+    document
+      .getElementById('closeDetail')
+      .addEventListener(
+        'click',
+        closeDetail
+      );
+
+    searchInput.addEventListener(
+      'input',
+      applySearch
+    );
+
+    renderer.domElement.addEventListener(
+      'pointermove',
+      handlePointerMove
+    );
+
+    renderer.domElement.addEventListener(
+      'click',
+      handleClick
+    );
+
+    window.addEventListener(
+      'keydown',
+      event => {
+        if (
+          event.key === '/' &&
+          document.activeElement !== searchInput
+        ) {
+          event.preventDefault();
+
+          searchWrap.classList.add('open');
+          searchInput.focus();
+        }
+
+        if (
+          event.key.toLowerCase() === 'r'
+        ) {
+          randomFilm();
+        }
+
+        if (
+          event.key === 'Escape'
+        ) {
+          closeDetail();
+
+          searchWrap.classList.remove('open');
+
+          searchInput.value = '';
+
+          applySearch();
+        }
+      }
+    );
+
+    window.addEventListener(
+      'resize',
+      () => {
+        camera.aspect =
+          window.innerWidth /
+          window.innerHeight;
+
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(
+          window.innerWidth,
+          window.innerHeight
+        );
+
+        renderer.setPixelRatio(
+          Math.min(
+            window.devicePixelRatio,
+            2
+          )
+        );
+
+        fitCamera();
+      }
+    );
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      controls.update();
+
+      const time =
+        performance.now() * .001;
+
+      ceilingLight.intensity =
+        45 + Math.sin(time * .7) * .7;
+
+      frontWarm.intensity =
+        34 + Math.sin(time * .55) * .5;
+
+      renderer.render(
+        scene,
+        camera
+      );
+    }
+
+    fitCamera();
+    loadFilms();
+    animate();
+  </script>
+</body>
+</html>
