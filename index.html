@@ -2,154 +2,96 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<title>🎬 Movie Closet</title>
-<meta name="description" content="영화가 책등처럼 빽빽하게 꽂힌 나만의 워크인 영화 클로짓.">
-<meta property="og:title" content="🎬 Movie Closet">
-<meta property="og:description" content="영화가 책등처럼 빽빽하게 꽂힌 나만의 워크인 영화 클로짓.">
-<meta name="theme-color" content="#211810">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>THE MOVIE CLOSET</title>
+<meta name="description" content="나만의 영화 클로짓. 책등 사이를 거닐며 영화를 발견하세요.">
+<meta property="og:title" content="THE MOVIE CLOSET">
+<meta property="og:description" content="나만의 영화 클로짓. 책등 사이를 거닐며 영화를 발견하세요.">
+<meta name="theme-color" content="#242424">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
 <style>
-:root{
-  --bg:#18100b;
-  --panel:rgba(27,19,14,.96);
-  --cream:#f5ead5;
-  --muted:#bcae9b;
-  --gold:#d8b26a;
-}
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#120b07;color:var(--cream);font-family:Inter,"Noto Sans KR","Apple SD Gothic Neo",system-ui,sans-serif}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#171717;color:#eee;font-family:Arial,"Noto Sans KR",sans-serif}
 body{touch-action:none}
-#app{position:fixed;inset:0;overflow:hidden}
-#scene{position:absolute;inset:0}
-canvas{display:block;width:100%;height:100%}
-#vignette{
-  position:absolute;inset:0;pointer-events:none;
-  background:
-    radial-gradient(circle at 50% 44%,transparent 35%,rgba(10,5,2,.14) 72%,rgba(5,2,1,.7) 100%),
-    linear-gradient(180deg,rgba(0,0,0,.1),transparent 18%,transparent 78%,rgba(0,0,0,.38));
-}
-.topbar{
-  position:absolute;left:18px;right:18px;top:16px;
-  display:flex;justify-content:space-between;align-items:flex-start;
-  z-index:20;pointer-events:none;
-}
-.tools,.views{display:flex;gap:8px;align-items:center;pointer-events:auto}
-button,.search{
-  border:1px solid rgba(255,239,209,.18);
-  background:rgba(24,16,11,.72);
-  color:var(--cream);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-  border-radius:12px;
-  height:40px;
-}
-button{
-  padding:0 14px;font:inherit;font-size:13px;cursor:pointer;
-  transition:.18s ease;
-}
-button:hover{background:rgba(69,46,29,.9);border-color:rgba(255,239,209,.35)}
-button.active{background:#ead3a6;color:#24170e;border-color:#ead3a6}
-.search{
-  width:210px;padding:0 13px;outline:none;font-size:13px;
-}
-.search::placeholder{color:#bcae9b}
-.search:focus{border-color:rgba(216,178,106,.7)}
-#tooltip{
-  position:absolute;left:50%;bottom:28px;transform:translateX(-50%) translateY(8px);
-  min-width:230px;max-width:calc(100vw - 30px);
-  padding:11px 15px;border-radius:12px;
-  background:rgba(24,16,11,.92);border:1px solid rgba(255,239,209,.18);
-  box-shadow:0 10px 30px rgba(0,0,0,.3);
-  opacity:0;pointer-events:none;transition:.16s ease;z-index:15;
-  text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-#tooltip.show{opacity:1;transform:translateX(-50%) translateY(0)}
-#tooltip .num{color:var(--gold);font-weight:800;margin-right:7px}
-#tooltip .rating{color:#f2cf82;margin-left:7px}
-#panel{
-  position:absolute;right:0;top:0;bottom:0;width:min(430px,43vw);
-  padding:74px 34px 36px;
-  background:linear-gradient(90deg,rgba(22,14,10,.78),rgba(25,17,12,.98) 8%);
-  border-left:1px solid rgba(255,239,209,.1);
-  transform:translateX(102%);
-  transition:transform .42s cubic-bezier(.2,.8,.2,1);
-  z-index:30;overflow:auto;pointer-events:auto;
-  box-shadow:-25px 0 55px rgba(0,0,0,.28);
-}
+#app{position:fixed;inset:0}
+canvas{display:block}
+#topbar{position:fixed;z-index:20;top:18px;left:18px;right:18px;display:flex;align-items:center;justify-content:space-between;pointer-events:none}
+.group{display:flex;gap:8px;align-items:center;pointer-events:auto}
+button,input{font:inherit}
+button{border:1px solid rgba(255,255,255,.18);background:rgba(22,22,22,.78);backdrop-filter:blur(10px);color:#eee;border-radius:6px;padding:9px 13px;cursor:pointer;transition:.15s}
+button:hover{background:#eee;color:#171717}
+#searchWrap{display:flex;align-items:center;background:rgba(22,22,22,.82);border:1px solid rgba(255,255,255,.18);border-radius:6px;backdrop-filter:blur(10px);overflow:hidden}
+#search{width:230px;border:0;outline:0;background:transparent;color:#fff;padding:10px 12px}
+#search::placeholder{color:#999}
+#random{white-space:nowrap}
+#viewToggle button.active{background:#eee;color:#171717}
+#hint{position:fixed;z-index:8;left:50%;bottom:52px;transform:translateX(-50%);padding:7px 11px;background:rgba(15,15,15,.62);border:1px solid rgba(255,255,255,.12);border-radius:5px;color:#bbb;font-size:11px;letter-spacing:.04em;pointer-events:none}
+#credit{position:fixed;z-index:8;left:50%;bottom:10px;transform:translateX(-50%);font-size:9px;color:#777;white-space:nowrap;pointer-events:none}
+#tooltip{position:fixed;z-index:30;display:none;min-width:240px;max-width:340px;padding:10px 12px;background:#111;color:#eee;border:1px solid #555;border-radius:5px;box-shadow:0 10px 30px #000;pointer-events:none;font-size:12px;line-height:1.55}
+#tooltip strong{font-size:14px}
+#panel{position:fixed;z-index:25;top:0;right:0;width:min(430px,92vw);height:100%;background:rgba(20,20,20,.96);box-shadow:-25px 0 70px rgba(0,0,0,.45);transform:translateX(105%);transition:transform .32s cubic-bezier(.2,.8,.2,1);overflow:auto;padding:76px 34px 42px}
 #panel.open{transform:translateX(0)}
-.close{
-  position:absolute;right:20px;top:18px;width:38px;height:38px;padding:0;
-  border-radius:50%;font-size:21px;color:#e9dbc5
-}
-.panel-number{font-size:12px;color:var(--gold);letter-spacing:.14em;font-weight:800;margin-bottom:10px}
-.panel-title{font-size:clamp(25px,3vw,38px);line-height:1.12;font-weight:900;letter-spacing:-.04em;margin:0 0 8px}
-.panel-original{font-size:14px;color:var(--muted);margin-bottom:24px}
-.meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:25px}
-.meta span{font-size:12px;padding:7px 10px;border:1px solid rgba(255,239,209,.13);border-radius:8px;color:#e4d7c2;background:rgba(255,255,255,.035)}
-.meta .score{color:#f4d486;border-color:rgba(216,178,106,.3)}
-.section-label{font-size:11px;letter-spacing:.12em;color:#9d8b77;font-weight:800;margin:22px 0 9px}
-.overview{font-size:14px;line-height:1.75;color:#ded1bf;white-space:pre-wrap}
-.note{font-size:14px;line-height:1.7;color:#f0dfbd}
-.tmdb{
-  display:inline-flex;align-items:center;justify-content:center;
-  margin-top:25px;height:42px;padding:0 15px;border-radius:10px;
-  background:#01b4e4;color:#fff;text-decoration:none;font-weight:800;font-size:13px;
-}
-#listView{
-  position:absolute;inset:76px 18px 54px;
-  z-index:10;display:none;overflow:auto;
-  padding:8px max(4px,calc((100vw - 1100px)/2));
-}
-#listView.show{display:block}
-.list-item{
-  display:grid;grid-template-columns:70px 1fr auto;gap:18px;align-items:center;
-  padding:16px 18px;margin-bottom:8px;border-radius:14px;
-  border:1px solid rgba(255,239,209,.1);
-  background:rgba(27,18,12,.78);cursor:pointer;
-}
-.list-spine{height:76px;border-radius:5px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:12px}
-.list-title{font-size:16px;font-weight:800}
-.list-original{font-size:12px;color:var(--muted);margin-top:4px}
-.list-meta{font-size:12px;color:#d1c1ad;text-align:right}
-#footer{
-  position:absolute;left:50%;bottom:7px;transform:translateX(-50%);
-  z-index:20;color:rgba(240,226,204,.48);font-size:9px;white-space:nowrap;
-  pointer-events:none;
-}
-#loading{
-  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  background:#180f09;z-index:50;font-size:13px;color:#d8c5aa;transition:opacity .4s;
-}
+#close{position:absolute;top:20px;right:20px;width:38px;height:38px;padding:0;font-size:23px}
+#panel .number{font-family:Georgia,serif;color:#999;font-size:12px;letter-spacing:.14em}
+#panel h1{margin:9px 0 3px;font-size:34px;line-height:1.12;font-weight:800}
+#panel .original{color:#aaa;font-size:15px;margin-bottom:24px}
+.detailGrid{display:grid;grid-template-columns:1fr 1fr;gap:15px 20px;border-top:1px solid #3c3c3c;border-bottom:1px solid #3c3c3c;padding:17px 0;margin-bottom:22px}
+.label{font-size:9px;color:#777;text-transform:uppercase;letter-spacing:.12em;margin-bottom:5px}
+.value{font-size:14px;color:#eee}
+.section{margin:22px 0}
+.section h3{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#777;margin:0 0 9px}
+.section p{font-size:14px;line-height:1.7;color:#ddd;margin:0}
+#tmdb{display:inline-block;color:#fff;border-bottom:1px solid #777;padding-bottom:2px;text-decoration:none}
+#listView{position:fixed;z-index:15;inset:70px 18px 28px;display:none;background:rgba(20,20,20,.96);border:1px solid #444;border-radius:7px;overflow:auto;padding:18px}
+.listRow{display:grid;grid-template-columns:70px 1fr 110px 80px;gap:15px;align-items:center;padding:13px 8px;border-bottom:1px solid #303030;cursor:pointer}
+.listRow:hover{background:#2b2b2b}
+.listNum{color:#888;font-family:monospace}
+.listTitle{font-weight:700}
+.listOriginal{color:#888;font-size:12px;margin-top:3px}
+.listDate,.listScore{color:#aaa;font-size:12px}
+.empty{padding:60px;text-align:center;color:#888}
+#loading{position:fixed;z-index:50;inset:0;background:#171717;display:grid;place-items:center;color:#aaa;font-size:12px;letter-spacing:.08em;transition:opacity .4s}
 #loading.hide{opacity:0;pointer-events:none}
-#empty{
-  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  color:#bcae9b;display:none;text-align:center;z-index:5
-}
 @media(max-width:700px){
-  .topbar{left:10px;right:10px;top:10px}
-  .tools,.views{gap:5px}
-  .search{width:130px;height:38px}
-  button{height:38px;padding:0 10px;font-size:12px}
-  .hide-mobile{display:none}
-  #panel{
-    top:auto;width:100%;height:min(64vh,560px);
-    padding:30px 22px 25px;
-    border-left:0;border-top:1px solid rgba(255,239,209,.12);
-    background:linear-gradient(180deg,rgba(24,16,11,.97),rgba(27,18,12,.99));
-  }
-  #panel.open{transform:translateY(0)}
-  #panel{transform:translateY(105%)}
-  .close{right:12px;top:10px}
-  .panel-title{font-size:26px;padding-right:30px}
-  #tooltip{bottom:18px;font-size:12px}
-  #footer{font-size:8px;bottom:4px;max-width:94vw;text-align:center}
-  #listView{inset:65px 9px 40px}
-  .list-item{grid-template-columns:54px 1fr;gap:12px;padding:12px}
-  .list-spine{height:65px}
-  .list-meta{grid-column:2;text-align:left}
+ #topbar{top:10px;left:10px;right:10px;align-items:flex-start}
+ #search{width:145px;padding:9px}
+ #random{padding:9px}
+ #viewToggle button{padding:9px 8px}
+ #hint{bottom:44px;font-size:9px}
+ #credit{bottom:7px;font-size:7px}
+ #panel{width:94vw;padding:70px 24px 35px}
+ #panel h1{font-size:29px}
+ .listRow{grid-template-columns:50px 1fr 70px}
+ .listDate{display:none}
 }
 </style>
+</head>
+<body>
+<div id="app"></div>
+
+<div id="topbar">
+  <div class="group">
+    <div id="searchWrap"><span style="padding-left:11px;color:#888">⌕</span><input id="search" placeholder="제목, 원제, 번호 검색"></div>
+    <button id="random">무작위로 꺼내기</button>
+  </div>
+  <div class="group" id="viewToggle">
+    <button id="closetBtn" class="active">클로짓 보기</button>
+    <button id="listBtn">목록 보기</button>
+  </div>
+</div>
+
+<div id="hint">드래그하여 둘러보기 · 책등을 클릭하세요</div>
+<div id="credit">영화 정보: TMDB (This product uses the TMDB API but is not endorsed or certified by TMDB.)</div>
+<div id="tooltip"></div>
+
+<aside id="panel">
+  <button id="close">×</button>
+  <div id="panelContent"></div>
+</aside>
+
+<section id="listView"></section>
+<div id="loading">SHELVING THE COLLECTION…</div>
+
 <script type="importmap">
 {
   "imports": {
@@ -158,556 +100,366 @@ button.active{background:#ead3a6;color:#24170e;border-color:#ead3a6}
   }
 }
 </script>
-</head>
-<body>
-<div id="app">
-  <div id="scene"></div>
-  <div id="vignette"></div>
-
-  <div class="topbar">
-    <div class="tools">
-      <input id="search" class="search" type="search" placeholder="영화 검색" autocomplete="off">
-      <button id="randomBtn">무작위로 꺼내기</button>
-    </div>
-    <div class="views">
-      <button id="closetBtn" class="active">클로짓 보기</button>
-      <button id="listBtn">목록 보기</button>
-    </div>
-  </div>
-
-  <div id="tooltip"></div>
-  <div id="listView"></div>
-  <div id="empty">films.json에서 영화를 불러오지 못했습니다.</div>
-
-  <aside id="panel">
-    <button class="close" id="closePanel">×</button>
-    <div id="panelContent"></div>
-  </aside>
-
-  <div id="footer">영화 정보: TMDB (This product uses the TMDB API but is not endorsed or certified by TMDB.)</div>
-  <div id="loading">영화 클로짓을 준비하는 중…</div>
-</div>
 
 <script type="module">
 import * as THREE from "three";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import {OrbitControls} from "three/addons/controls/OrbitControls.js";
 
-const sceneEl=document.getElementById("scene");
+const app=document.getElementById("app");
 const tooltip=document.getElementById("tooltip");
 const panel=document.getElementById("panel");
 const panelContent=document.getElementById("panelContent");
 const listView=document.getElementById("listView");
-const loading=document.getElementById("loading");
-const empty=document.getElementById("empty");
 const search=document.getElementById("search");
+const loading=document.getElementById("loading");
 
 let films=[];
-let cases=[];
 let selected=null;
-let hovered=null;
-let scene, camera, renderer, controls, raycaster, mouse;
-let clock;
-let targetYaw=0;
-let selectedAnimation=null;
-let currentMode="closet";
+let rayTargets=[];
+let fakeTargets=[];
+let allBooks=[];
+let shelfGroup=new THREE.Group();
 
-const ROOM_W=10.8;
-const ROOM_D=8.8;
-const ROOM_H=5.8;
-const SHELF_COUNT=6;
-const SHELF_H=0.78;
-const SHELF_START=0.55;
-const CASE_H=0.67;
-const CASE_D=0.34;
-const CASE_GAP=0.025;
-const FRONT_YAW=0;
-const SIDE_ANGLE=Math.PI/2;
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x181818);
 
-function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
-function hexColor(v){
-  try{return new THREE.Color(v||"#72583e")}catch{return new THREE.Color("#72583e")}
-}
-function escapeHTML(v){
-  return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))
-}
-function formatDate(v){
-  if(!v)return "";
-  const d=new Date(v+"T00:00:00");
-  if(Number.isNaN(d.getTime()))return v;
-  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")}`;
-}
-function formatNumber(v){
-  return new Intl.NumberFormat("ko-KR").format(Number(v)||0);
-}
-function titleChars(title){
-  return [...String(title||"")].slice(0,11).join("\n");
-}
-function makeTextTexture(film){
-  const w=256,h=512;
+const camera=new THREE.PerspectiveCamera(54,innerWidth/innerHeight,.1,100);
+camera.position.set(0,2.15,7.1);
+
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.shadowMap.enabled=false;
+app.appendChild(renderer.domElement);
+
+const ambient=new THREE.AmbientLight(0xffffff,2.7);
+scene.add(ambient);
+
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;
+controls.dampingFactor=.075;
+controls.enablePan=false;
+controls.enableZoom=false;
+controls.minPolarAngle=1.25;
+controls.maxPolarAngle=1.92;
+controls.target.set(0,2.15,0);
+controls.rotateSpeed=.34;
+
+const room=new THREE.Group();
+scene.add(room);
+room.add(shelfGroup);
+
+const wallMat=new THREE.MeshBasicMaterial({color:0x202020});
+const floorMat=new THREE.MeshBasicMaterial({color:0x252525});
+
+const backWall=new THREE.Mesh(new THREE.PlaneGeometry(18,9),wallMat);
+backWall.position.set(0,4,-3.4);
+room.add(backWall);
+
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(18,14),floorMat);
+floor.rotation.x=-Math.PI/2;
+floor.position.set(0,0,-.5);
+room.add(floor);
+
+const leftWall=new THREE.Mesh(new THREE.PlaneGeometry(9,9),wallMat);
+leftWall.rotation.y=Math.PI/2;
+leftWall.position.set(-4.45,4,.7);
+room.add(leftWall);
+
+const rightWall=new THREE.Mesh(new THREE.PlaneGeometry(9,9),wallMat);
+rightWall.rotation.y=-Math.PI/2;
+rightWall.position.set(4.45,4,.7);
+room.add(rightWall);
+
+function makeTextTexture(text,bg,fg="#111",size=70){
   const c=document.createElement("canvas");
-  c.width=w;c.height=h;
-  const ctx=c.getContext("2d");
-  ctx.clearRect(0,0,w,h);
-  ctx.textAlign="center";
-  ctx.textBaseline="middle";
-  const num=`#${String(film?.id??"").padStart(3,"0")}`;
-  ctx.fillStyle="rgba(255,248,230,.96)";
-  ctx.font="800 31px Arial,sans-serif";
-  ctx.fillText(num,w/2,42);
-  if(film){
-    const chars=[...String(film.title||"")].slice(0,10);
-    const fontSize=chars.length>7?31:35;
-    ctx.font=`900 ${fontSize}px "Noto Sans KR",Arial,sans-serif`;
-    const gap=Math.min(47,(h-92)/Math.max(chars.length,1));
-    chars.forEach((ch,i)=>{
-      ctx.fillText(ch,w/2,87+i*gap);
-    });
-  }
-  const texture=new THREE.CanvasTexture(c);
-  texture.colorSpace=THREE.SRGBColorSpace;
-  texture.anisotropy=4;
-  return texture;
+  c.width=256;c.height=512;
+  const x=c.getContext("2d");
+  x.fillStyle=bg;x.fillRect(0,0,c.width,c.height);
+  x.fillStyle=fg;
+  x.font="900 52px Arial, sans-serif";
+  x.textAlign="center";
+  x.textBaseline="middle";
+  x.save();
+  x.translate(128,300);
+  x.rotate(-Math.PI/2);
+  x.fillText(text.slice(0,13),0,0);
+  x.restore();
+  return new THREE.CanvasTexture(c);
 }
-function makeEmptyTexture(){
-  const c=document.createElement("canvas");
-  c.width=128;c.height=256;
-  const ctx=c.getContext("2d");
-  ctx.fillStyle="rgba(255,255,255,.035)";
-  ctx.fillRect(0,0,c.width,c.height);
-  ctx.strokeStyle="rgba(255,255,255,.13)";
-  ctx.lineWidth=3;
-  ctx.strokeRect(9,9,c.width-18,c.height-18);
-  const t=new THREE.CanvasTexture(c);
-  t.colorSpace=THREE.SRGBColorSpace;
-  return t;
+
+function makeSpine({title,id,color,isFilm=false}){
+  const width=isFilm?.54:.23;
+  const h=1.02;
+  const g=new THREE.Group();
+
+  const mat=new THREE.MeshBasicMaterial({color:new THREE.Color(color)});
+  const body=new THREE.Mesh(new THREE.BoxGeometry(width,h,.18),mat);
+  body.position.y=h/2;
+  g.add(body);
+
+  const badgeCanvas=document.createElement("canvas");
+  badgeCanvas.width=256;badgeCanvas.height=130;
+  const bx=badgeCanvas.getContext("2d");
+  bx.fillStyle=color;bx.fillRect(0,0,256,130);
+  bx.fillStyle=new THREE.Color(color).getHSL({}).l>.52?"#111":"#fff";
+  bx.font="900 54px Arial";
+  bx.textAlign="center";
+  bx.textBaseline="middle";
+  bx.fillText("#"+String(id).padStart(3,"0"),128,66);
+  const badgeTex=new THREE.CanvasTexture(badgeCanvas);
+  const badge=new THREE.Mesh(new THREE.PlaneGeometry(width*.9,.17),new THREE.MeshBasicMaterial({map:badgeTex,transparent:true}));
+  badge.position.set(0,.88,.096);
+  g.add(badge);
+
+  const titleTex=makeTextTexture(title,color,new THREE.Color(color).getHSL({}).l>.52?"#111":"#fff");
+  const titleMesh=new THREE.Mesh(new THREE.PlaneGeometry(width*.8,.83),new THREE.MeshBasicMaterial({map:titleTex,transparent:true}));
+  titleMesh.position.set(0,.43,.097);
+  g.add(titleMesh);
+
+  g.userData={film:isFilm?films.find(f=>f.id===id):null,id,title};
+  return g;
 }
-function createSpine(film,index){
-  const group=new THREE.Group();
-  const material=new THREE.MeshStandardMaterial({
-    color:hexColor(film?.color || ["#6f5137","#765e43","#624b36","#80634a","#70543d","#886b4e"][index%6]),
-    roughness:.62,
-    metalness:.02
-  });
-  const mesh=new THREE.Mesh(new THREE.BoxGeometry(.36,CASE_H,CASE_D),material);
-  mesh.castShadow=true;
-  mesh.receiveShadow=true;
-  group.add(mesh);
 
-  const faceMat=new THREE.MeshBasicMaterial({
-    map:film?makeTextTexture(film):makeEmptyTexture(),
-    transparent:true,
-    depthWrite:false
-  });
-  const face=new THREE.Mesh(new THREE.PlaneGeometry(.32,.64),faceMat);
-  face.position.z=CASE_D/2+.006;
-  group.add(face);
+const fakeColors=["#f3f0e7","#fffdf6","#d7d7d4","#a93d3a","#24364e","#28747b","#b28a28","#ebe5d6","#55595b"];
+const fakeTitles=["THE ART OF CINEMA","MOTION PICTURES","FILM HISTORY","MODERN CLASSICS","VISIONS","THE DIRECTORS","WORLD CINEMA","SCREEN","THE MOVIE BOOK","FILM NOTES"];
 
-  const top=new THREE.Mesh(
-    new THREE.BoxGeometry(.31,.025,.34),
-    new THREE.MeshStandardMaterial({color:0x4a3423,roughness:.75})
-  );
-  top.position.y=CASE_H/2-.025;
-  top.position.z=.002;
-  group.add(top);
+function addShelf(x,rotY,filmSide=false){
+  const wall=new THREE.Group();
+  wall.position.x=x;
+  wall.rotation.y=rotY;
+  shelfGroup.add(wall);
 
-  group.userData={film,index,baseX:0,baseY:0,baseZ:0,baseRotY:0,mesh};
-  return group;
-}
-function addShelf(y,wall="front"){
-  const shelf=new THREE.Mesh(
-    new THREE.BoxGeometry(wall==="front"?ROOM_W-1.05:.9,0.13,wall==="front"?0.54:ROOM_D-1.0),
-    new THREE.MeshStandardMaterial({color:0x704b2c,roughness:.78,metalness:.01})
-  );
-  shelf.position.y=y;
-  shelf.castShadow=true;
-  shelf.receiveShadow=true;
-  if(wall==="left"){
-    shelf.rotation.y=Math.PI/2;
-    shelf.scale.x=1;
-  }
-  scene.add(shelf);
+  const shelfWidth=7.8;
+  const shelfDepth=.43;
+  const shelfLevels=[.72,1.72,2.72,3.72,4.72,5.72,6.72];
 
-  const under=new THREE.Mesh(
-    new THREE.BoxGeometry(wall==="front"?ROOM_W-1.05:.12,.09,wall==="front"?.08:ROOM_D-1),
-    new THREE.MeshStandardMaterial({color:0x3b2415,roughness:.9})
-  );
-  under.position.set(0,y-.11,wall==="front"?ROOM_D/2-.29:-ROOM_W/2+.29);
-  if(wall==="left")under.position.set(-ROOM_W/2+.29,y,0);
-}
-function makeWoodMaterial(color=0x704b2c){
-  return new THREE.MeshStandardMaterial({color,roughness:.82,metalness:0});
-}
-function buildRoom(){
-  scene.background=new THREE.Color(0x24170f);
-  const floor=new THREE.Mesh(
-    new THREE.PlaneGeometry(40,40),
-    makeWoodMaterial(0x3c2618)
-  );
-  floor.rotation.x=-Math.PI/2;
-  floor.position.y=-.04;
-  floor.receiveShadow=true;
-  scene.add(floor);
+  for(let i=0;i<7;i++){
+    const board=new THREE.Mesh(new THREE.BoxGeometry(shelfWidth,shelfDepth,.5),new THREE.MeshBasicMaterial({color:0x343434}));
+    board.position.set(0,shelfLevels[i]-.11,-.03);
+    wall.add(board);
 
-  const back=new THREE.Mesh(new THREE.PlaneGeometry(ROOM_W,ROOM_H),makeWoodMaterial(0x3b281b));
-  back.position.set(0,ROOM_H/2,-ROOM_D/2);
-  back.receiveShadow=true;
-  scene.add(back);
+    const back=new THREE.Mesh(new THREE.BoxGeometry(shelfWidth,.95,.12),new THREE.MeshBasicMaterial({color:0x292929}));
+    back.position.set(0,shelfLevels[i]+.37,-.27);
+    wall.add(back);
 
-  const left=new THREE.Mesh(new THREE.PlaneGeometry(ROOM_D,ROOM_H),makeWoodMaterial(0x4a301e));
-  left.rotation.y=Math.PI/2;
-  left.position.set(-ROOM_W/2,ROOM_H/2,0);
-  left.receiveShadow=true;
-  scene.add(left);
-
-  const right=new THREE.Mesh(new THREE.PlaneGeometry(ROOM_D,ROOM_H),makeWoodMaterial(0x4a301e));
-  right.rotation.y=-Math.PI/2;
-  right.position.set(ROOM_W/2,ROOM_H/2,0);
-  right.receiveShadow=true;
-  scene.add(right);
-
-  for(let i=0;i<SHELF_COUNT;i++){
-    const y=SHELF_START+i*SHELF_H;
-    const board=new THREE.Mesh(
-      new THREE.BoxGeometry(ROOM_W-.6,.12,.46),
-      makeWoodMaterial(0x704b2d)
-    );
-    board.position.set(0,y,-ROOM_D/2+.26);
-    board.castShadow=true;board.receiveShadow=true;
-    scene.add(board);
-
-    const lboard=new THREE.Mesh(
-      new THREE.BoxGeometry(.46,.12,ROOM_D-.65),
-      makeWoodMaterial(0x704b2d)
-    );
-    lboard.position.set(-ROOM_W/2+.26,y,0);
-    lboard.castShadow=true;lboard.receiveShadow=true;
-    scene.add(lboard);
-
-    const rboard=lboard.clone();
-    rboard.position.x=ROOM_W/2-.26;
-    scene.add(rboard);
-  }
-
-  const baseY=.2;
-  const leftPost=new THREE.Mesh(new THREE.BoxGeometry(.24,ROOM_H,.28),makeWoodMaterial(0x5b3b24));
-  leftPost.position.set(-ROOM_W/2+.25,ROOM_H/2,-ROOM_D/2+.24);
-  leftPost.castShadow=true;scene.add(leftPost);
-  const rightPost=leftPost.clone();
-  rightPost.position.x=ROOM_W/2-.25;
-  scene.add(rightPost);
-
-  const ceiling=new THREE.Mesh(
-    new THREE.PlaneGeometry(40,40),
-    new THREE.MeshStandardMaterial({color:0x24170f,roughness:1})
-  );
-  ceiling.rotation.x=Math.PI/2;
-  ceiling.position.y=ROOM_H;
-  scene.add(ceiling);
-
-  const light1=new THREE.PointLight(0xffd49b,5.2,12,2);
-  light1.position.set(0,5.45,1.4);
-  light1.castShadow=true;
-  light1.shadow.mapSize.set(1024,1024);
-  scene.add(light1);
-
-  const light2=new THREE.PointLight(0xffb86d,2.4,10,2);
-  light2.position.set(-3.6,3.2,1.8);
-  scene.add(light2);
-
-  const light3=new THREE.PointLight(0xffd7a6,2.8,10,2);
-  light3.position.set(3.7,3.6,-1.6);
-  scene.add(light3);
-
-  const ambient=new THREE.HemisphereLight(0xffe1b7,0x24160e,1.8);
-  scene.add(ambient);
-}
-function fillCases(){
-  cases.forEach(c=>scene.remove(c));
-  cases=[];
-  const shelfSlots=Math.floor((ROOM_W-1.0)/(.39));
-  const all=[];
-  const frontShelf=Math.floor(SHELF_COUNT/2);
-
-  for(let s=0;s<SHELF_COUNT;s++){
-    for(let i=0;i<shelfSlots;i++){
-      const x=-ROOM_W/2+.62+i*.39;
-      const y=SHELF_START+s*SHELF_H+.40;
-      all.push({wall:"front",s,i,x,y,z:-ROOM_D/2+.50,rot:0});
-    }
-  }
-
-  const sideSlots=Math.floor((ROOM_D-1.1)/(.39));
-  for(let s=0;s<SHELF_COUNT;s++){
-    for(let i=0;i<sideSlots;i++){
-      const z=-ROOM_D/2+.62+i*.39;
-      const y=SHELF_START+s*SHELF_H+.40;
-      all.push({wall:"left",s,i,x:-ROOM_W/2+.50,y,z,rot:-Math.PI/2});
-      all.push({wall:"right",s,i,x:ROOM_W/2-.50,y,z,rot:Math.PI/2});
-    }
-  }
-
-  const frontSlots=all.filter(x=>x.wall==="front"&&x.s===frontShelf);
-  films.forEach((film,i)=>{
-    const slot=frontSlots[i%frontSlots.length];
-    if(!slot)return;
-    const g=createSpine(film,i);
-    g.position.set(slot.x,slot.y,slot.z);
-    g.rotation.y=slot.rot;
-    g.userData.baseX=slot.x;
-    g.userData.baseY=slot.y;
-    g.userData.baseZ=slot.z;
-    g.userData.baseRotY=slot.rot;
-    g.userData.wall=slot.wall;
-    g.userData.shelf=slot.s;
-    g.userData.slot=slot.i;
-    scene.add(g);
-    cases.push(g);
-  });
-
-  const occupied=new Set(frontSlots.slice(0,films.length).map((s)=>`${s.s}:${s.i}`));
-  let emptyIndex=0;
-  all.forEach(slot=>{
-    if(slot.wall==="front"&&slot.s===frontShelf&&occupied.has(`${slot.s}:${slot.i}`))return;
-    const g=createSpine(null,emptyIndex++);
-    g.position.set(slot.x,slot.y,slot.z);
-    g.rotation.y=slot.rot;
-    g.userData.baseX=slot.x;
-    g.userData.baseY=slot.y;
-    g.userData.baseZ=slot.z;
-    g.userData.baseRotY=slot.rot;
-    g.userData.wall=slot.wall;
-    g.userData.shelf=slot.s;
-    g.userData.slot=slot.i;
-    scene.add(g);
-    cases.push(g);
-  });
-}
-function initThree(){
-  scene=new THREE.Scene();
-  clock=new THREE.Clock();
-  camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,.1,100);
-  camera.position.set(0,2.55,1.9);
-
-  renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-  renderer.setSize(innerWidth,innerHeight);
-  renderer.shadowMap.enabled=true;
-  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-  renderer.outputColorSpace=THREE.SRGBColorSpace;
-  renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=1.16;
-  sceneEl.appendChild(renderer.domElement);
-
-  controls=new OrbitControls(camera,renderer.domElement);
-  controls.enableDamping=true;
-  controls.dampingFactor=.075;
-  controls.enableZoom=false;
-  controls.enablePan=false;
-  controls.rotateSpeed=.32;
-  controls.target.set(0,2.55,-2.4);
-  controls.minPolarAngle=1.27;
-  controls.maxPolarAngle=1.87;
-  controls.minAzimuthAngle=-Math.PI*.78;
-  controls.maxAzimuthAngle=Math.PI*.78;
-  controls.update();
-
-  raycaster=new THREE.Raycaster();
-  mouse=new THREE.Vector2();
-  buildRoom();
-  fillCases();
-
-  renderer.domElement.addEventListener("pointermove",onPointerMove,{passive:true});
-  renderer.domElement.addEventListener("pointerdown",onPointerDown,{passive:true});
-  renderer.domElement.addEventListener("pointerup",onPointerUp,{passive:true});
-  window.addEventListener("resize",onResize);
-  animate();
-}
-let downX=0,downY=0,downTime=0;
-function pointerToNDC(e){
-  const r=renderer.domElement.getBoundingClientRect();
-  mouse.x=((e.clientX-r.left)/r.width)*2-1;
-  mouse.y=-((e.clientY-r.top)/r.height)*2+1;
-}
-function intersectCase(e){
-  pointerToNDC(e);
-  raycaster.setFromCamera(mouse,camera);
-  const hits=raycaster.intersectObjects(cases,true);
-  if(!hits.length)return null;
-  let o=hits[0].object;
-  while(o.parent&&!o.userData.film&&o.parent.type!=="Scene")o=o.parent;
-  return o.userData?.film?o:null;
-}
-function onPointerMove(e){
-  if(currentMode!=="closet")return;
-  const hit=intersectCase(e);
-  if(hit!==hovered){
-    hovered=hit;
-    if(hit){
-      const f=hit.userData.film;
-      tooltip.innerHTML=`<span class="num">#${String(f.id).padStart(3,"0")}</span>${escapeHTML(f.title)}<span class="rating">★ ${Number(f.score).toFixed(1)}</span>`;
-      tooltip.classList.add("show");
-      document.body.style.cursor="pointer";
+    let cursor=-shelfWidth/2+.12;
+    if(filmSide && i===3 && films.length){
+      const gap=Math.min(.06,(shelfWidth-.3)/Math.max(films.length,1)*.18);
+      const usable=shelfWidth-.25;
+      const fw=Math.min(.58,usable/Math.max(films.length,1)-gap);
+      const total=films.length*fw+(films.length-1)*gap;
+      cursor=-total/2;
+      films.forEach(f=>{
+        const book=makeSpine({title:f.title,id:f.id,color:f.color||fakeColors[Math.floor(Math.random()*fakeColors.length)],isFilm:true});
+        book.scale.y=.94;
+        book.position.set(cursor+fw/2,shelfLevels[i],.02);
+        book.scale.x=fw/.54;
+        wall.add(book);
+        rayTargets.push(book);
+        allBooks.push(book);
+        cursor+=fw+gap;
+      });
+      while(cursor<shelfWidth/2-.05){
+        const w=.17+Math.random()*.12;
+        const b=makeSpine({title:fakeTitles[Math.floor(Math.random()*fakeTitles.length)],id:1000+fakeTargets.length,color:fakeColors[Math.floor(Math.random()*fakeColors.length)]});
+        b.scale.x=w/.23;
+        b.position.set(cursor+w/2,shelfLevels[i],.02);
+        wall.add(b);fakeTargets.push(b);allBooks.push(b);cursor+=w+.025;
+      }
     }else{
-      tooltip.classList.remove("show");
-      document.body.style.cursor="";
+      while(cursor<shelfWidth/2-.05){
+        const w=.13+Math.random()*.14;
+        const b=makeSpine({title:fakeTitles[Math.floor(Math.random()*fakeTitles.length)],id:1000+fakeTargets.length,color:fakeColors[Math.floor(Math.random()*fakeColors.length)]});
+        b.scale.x=w/.23;
+        b.position.set(cursor+w/2,shelfLevels[i],.02);
+        wall.add(b);fakeTargets.push(b);allBooks.push(b);cursor+=w+.025;
+      }
     }
   }
 }
-function onPointerDown(e){
-  downX=e.clientX;downY=e.clientY;downTime=performance.now();
+
+addShelf(-4.05,Math.PI/2,false);
+addShelf(4.05,-Math.PI/2,true);
+
+function rebuildForFilms(){
+  while(shelfGroup.children.length)shelfGroup.remove(shelfGroup.children[0]);
+  rayTargets=[];fakeTargets=[];allBooks=[];
+  addShelf(-4.05,Math.PI/2,false);
+  addShelf(4.05,-Math.PI/2,true);
 }
-function onPointerUp(e){
-  if(currentMode!=="closet")return;
-  const moved=Math.hypot(e.clientX-downX,e.clientY-downY);
-  if(moved>8||performance.now()-downTime>600)return;
-  const hit=intersectCase(e);
-  if(hit?.userData?.film)openFilm(hit.userData.film,hit);
+
+function dateText(s){
+  if(!s)return "—";
+  const p=s.split("-");
+  return p.length===3?`${p[0]}.${p[1]}.${p[2]}`:s;
 }
-function openFilm(film,obj){
-  selected=film;
+
+function scoreText(f){
+  return typeof f.score==="number"?`${f.score.toFixed(1)} / 10 (${Number(f.votes||0).toLocaleString()}표)`:"—";
+}
+
+function showFilm(f){
+  if(!f)return;
+  selected=f;
+  const genres=Array.isArray(f.genres)&&f.genres.length?f.genres.join(" · "):"—";
   panelContent.innerHTML=`
-    <div class="panel-number">#${String(film.id).padStart(3,"0")}</div>
-    <h1 class="panel-title">${escapeHTML(film.title)}</h1>
-    <div class="panel-original">${escapeHTML(film.original)}</div>
-    <div class="meta">
-      <span>${escapeHTML(formatDate(film.release))}</span>
-      ${(film.genres||[]).map(g=>`<span>${escapeHTML(g)}</span>`).join("")}
-      <span class="score">★ ${Number(film.score).toFixed(1)} · ${formatNumber(film.votes)}표</span>
+    <div class="number">SPINE #${String(f.id).padStart(3,"0")}</div>
+    <h1>${escapeHTML(f.title||"")}</h1>
+    <div class="original">${escapeHTML(f.original||"")}</div>
+    <div class="detailGrid">
+      <div><div class="label">개봉일</div><div class="value">${escapeHTML(dateText(f.release))}</div></div>
+      <div><div class="label">장르</div><div class="value">${escapeHTML(genres)}</div></div>
+      <div><div class="label">TMDB 평점</div><div class="value">${escapeHTML(scoreText(f))}</div></div>
+      <div><div class="label">번호</div><div class="value">#${String(f.id).padStart(3,"0")}</div></div>
     </div>
-    <div class="section-label">줄거리</div>
-    <div class="overview">${escapeHTML(film.overview)}</div>
-    ${film.note?`<div class="section-label">한 줄 감상</div><div class="note">${escapeHTML(film.note)}</div>`:""}
-    ${film.tmdb?`<a class="tmdb" href="${escapeHTML(film.tmdb)}" target="_blank" rel="noopener noreferrer">TMDB에서 보기 ↗</a>`:""}
+    ${f.overview?`<div class="section"><h3>줄거리</h3><p>${escapeHTML(f.overview)}</p></div>`:""}
+    ${f.note?`<div class="section"><h3>한 줄 감상</h3><p>${escapeHTML(f.note)}</p></div>`:""}
+    ${f.tmdb?`<div class="section"><h3>TMDB</h3><a id="tmdb" href="${safeUrl(f.tmdb)}" target="_blank" rel="noopener noreferrer">TMDB에서 보기 ↗</a></div>`:""}
   `;
   panel.classList.add("open");
-  if(obj){
-    cases.forEach(c=>c.userData.lift=0);
-    selectedAnimation={obj,start:obj.position.clone(),startScale:obj.scale.clone(),t:0};
+}
+
+function escapeHTML(s){
+  return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+
+function safeUrl(s){
+  try{
+    const u=new URL(s);
+    return u.protocol==="https:"&&u.hostname==="www.themoviedb.org"?u.href:"#";
+  }catch{return "#"}
+}
+
+function showTooltip(f,x,y){
+  tooltip.innerHTML=`<strong>#${String(f.id).padStart(3,"0")} · ${escapeHTML(f.title)}</strong><br>개봉일 ${escapeHTML(dateText(f.release))} · 평점 ${escapeHTML(f.score??"—")}`;
+  tooltip.style.display="block";
+  tooltip.style.left=Math.min(x+15,innerWidth-350)+"px";
+  tooltip.style.top=Math.min(y+15,innerHeight-75)+"px";
+}
+
+function hideTooltip(){tooltip.style.display="none"}
+
+function renderList(items=films){
+  listView.innerHTML=items.length?items.map(f=>`
+    <div class="listRow" data-id="${f.id}">
+      <div class="listNum">#${String(f.id).padStart(3,"0")}</div>
+      <div><div class="listTitle">${escapeHTML(f.title)}</div><div class="listOriginal">${escapeHTML(f.original||"")}</div></div>
+      <div class="listDate">${escapeHTML(dateText(f.release))}</div>
+      <div class="listScore">${escapeHTML(f.score??"—")}</div>
+    </div>
+  `).join(""):`<div class="empty">검색 결과가 없습니다.</div>`;
+  listView.querySelectorAll(".listRow").forEach(row=>row.addEventListener("click",()=>showFilm(films.find(f=>f.id==row.dataset.id))));
+}
+
+function setView(type){
+  const closet=type==="closet";
+  listView.style.display=closet?"none":"block";
+  renderer.domElement.style.display=closet?"block":"none";
+  document.getElementById("closetBtn").classList.toggle("active",closet);
+  document.getElementById("listBtn").classList.toggle("active",!closet);
+}
+
+const raycaster=new THREE.Raycaster();
+const pointer=new THREE.Vector2();
+
+function pointerFromEvent(e){
+  const r=renderer.domElement.getBoundingClientRect();
+  pointer.x=((e.clientX-r.left)/r.width)*2-1;
+  pointer.y=-((e.clientY-r.top)/r.height)*2+1;
+}
+
+renderer.domElement.addEventListener("pointermove",e=>{
+  if(e.pointerType==="touch")return;
+  pointerFromEvent(e);
+  raycaster.setFromCamera(pointer,camera);
+  const hits=raycaster.intersectObjects(rayTargets,true);
+  if(hits.length){
+    let o=hits[0].object;
+    while(o&&!o.userData.film)o=o.parent;
+    if(o?.userData.film){
+      showTooltip(o.userData.film,e.clientX,e.clientY);
+      renderer.domElement.style.cursor="pointer";
+      return;
+    }
   }
-}
-function closeFilm(){
-  panel.classList.remove("open");
-  if(selectedAnimation){
-    selectedAnimation.returning=true;
-  }
-  selected=null;
-}
-function animateCase(){
-  if(!selectedAnimation)return;
-  const a=selectedAnimation;
-  a.t=Math.min(1,a.t+0.055);
-  const e=a.returning?1-(1-a.t)*(1-a.t):a.t*a.t*(3-2*a.t);
-  if(a.returning){
-    a.obj.position.lerpVectors(new THREE.Vector3(a.start.x,a.start.y,a.start.z+.85),a.start, e);
-    a.obj.scale.lerpVectors(new THREE.Vector3(1.04,1.04,1.04),a.startScale,e);
-    if(a.t>=1)selectedAnimation=null;
-  }else{
-    const p=a.start.clone();
-    p.z+=.82;
-    a.obj.position.lerpVectors(a.start,p,e);
-    a.obj.scale.lerpVectors(a.startScale,new THREE.Vector3(1.04,1.04,1.04),e);
-  }
-}
-function animate(){
-  requestAnimationFrame(animate);
-  animateCase();
-  controls.update();
-  renderer.render(scene,camera);
-}
-function onResize(){
+  hideTooltip();
+  renderer.domElement.style.cursor="grab";
+});
+
+renderer.domElement.addEventListener("pointerleave",hideTooltip);
+
+renderer.domElement.addEventListener("click",e=>{
+  pointerFromEvent(e);
+  raycaster.setFromCamera(pointer,camera);
+  const hits=raycaster.intersectObjects(rayTargets,true);
+  if(!hits.length)return;
+  let o=hits[0].object;
+  while(o&&!o.userData.film)o=o.parent;
+  if(o?.userData.film)showFilm(o.userData.film);
+});
+
+renderer.domElement.addEventListener("pointerdown",()=>renderer.domElement.style.cursor="grabbing");
+renderer.domElement.addEventListener("pointerup",()=>renderer.domElement.style.cursor="grab");
+
+search.addEventListener("input",()=>{
+  const q=search.value.trim().toLowerCase();
+  const filtered=films.filter(f=>String(f.id).includes(q)||(f.title||"").toLowerCase().includes(q)||(f.original||"").toLowerCase().includes(q));
+  if(q){
+    const matches=new Set(filtered.map(f=>f.id));
+    rayTargets.forEach(o=>o.visible=matches.has(o.userData.id));
+  }else rayTargets.forEach(o=>o.visible=true);
+  renderList(filtered);
+});
+
+document.getElementById("random").addEventListener("click",()=>{
+  if(!films.length)return;
+  const f=films[Math.floor(Math.random()*films.length)];
+  showFilm(f);
+});
+
+document.getElementById("close").addEventListener("click",()=>panel.classList.remove("open"));
+document.getElementById("closetBtn").addEventListener("click",()=>setView("closet"));
+document.getElementById("listBtn").addEventListener("click",()=>setView("list"));
+
+window.addEventListener("keydown",e=>{
+  if(e.key==="/"){e.preventDefault();search.focus()}
+  if(e.key.toLowerCase()==="r"&&!e.metaKey&&!e.ctrlKey)document.getElementById("random").click();
+  if(e.key==="Escape"){panel.classList.remove("open");search.blur()}
+});
+
+window.addEventListener("resize",()=>{
   camera.aspect=innerWidth/innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth,innerHeight);
-}
-function showList(){
-  currentMode="list";
-  document.getElementById("closetBtn").classList.remove("active");
-  document.getElementById("listBtn").classList.add("active");
-  listView.classList.add("show");
-  document.getElementById("scene").style.display="none";
-  tooltip.classList.remove("show");
-  renderList(search.value);
-}
-function showCloset(){
-  currentMode="closet";
-  document.getElementById("listBtn").classList.remove("active");
-  document.getElementById("closetBtn").classList.add("active");
-  listView.classList.remove("show");
-  document.getElementById("scene").style.display="block";
-}
-function renderList(query=""){
-  const q=query.trim().toLowerCase();
-  const filtered=films.filter(f=>
-    !q||[f.title,f.original,...(f.genres||[])].join(" ").toLowerCase().includes(q)
-  );
-  listView.innerHTML=filtered.map(f=>`
-    <div class="list-item" data-id="${escapeHTML(f.id)}">
-      <div class="list-spine" style="background:${escapeHTML(f.color||"#72583e")}">#${String(f.id).padStart(3,"0")}</div>
-      <div>
-        <div class="list-title">${escapeHTML(f.title)}</div>
-        <div class="list-original">${escapeHTML(f.original)}</div>
-      </div>
-      <div class="list-meta">${escapeHTML(formatDate(f.release))}<br>★ ${Number(f.score).toFixed(1)} · ${formatNumber(f.votes)}표</div>
-    </div>
-  `).join("")||`<div style="padding:30px;text-align:center;color:#bcae9b">검색 결과가 없습니다.</div>`;
-  listView.querySelectorAll(".list-item").forEach(el=>{
-    el.addEventListener("click",()=>{
-      const film=films.find(f=>String(f.id)===el.dataset.id);
-      if(film)openFilm(film);
-    });
-  });
-}
-function focusSearch(){
-  const q=search.value.trim().toLowerCase();
-  cases.forEach(c=>{
-    const f=c.userData.film;
-    if(!f)return;
-    const match=!q||[f.title,f.original,...(f.genres||[])].join(" ").toLowerCase().includes(q);
-    c.visible=match;
-  });
-}
-function randomFilm(){
-  if(!films.length)return;
-  const f=films[Math.floor(Math.random()*films.length)];
-  const obj=cases.find(c=>c.userData.film?.id===f.id);
-  if(currentMode!=="closet")showCloset();
-  if(obj){
-    const p=new THREE.Vector3();
-    obj.getWorldPosition(p);
-    openFilm(f,obj);
-  }else openFilm(f);
-}
-document.getElementById("closePanel").addEventListener("click",closeFilm);
-document.getElementById("closetBtn").addEventListener("click",showCloset);
-document.getElementById("listBtn").addEventListener("click",showList);
-document.getElementById("randomBtn").addEventListener("click",randomFilm);
-search.addEventListener("input",()=>{
-  if(currentMode==="list")renderList(search.value);
-  else focusSearch();
-});
-window.addEventListener("keydown",e=>{
-  if(e.key==="Escape")closeFilm();
-  if(e.key==="/"&&document.activeElement!==search){
-    e.preventDefault();search.focus();
-  }
 });
 
-async function loadFilms(){
+async function init(){
   try{
-    const res=await fetch("./films.json",{cache:"no-store"});
-    if(!res.ok)throw new Error("films.json");
-    const data=await res.json();
-    films=Array.isArray(data)?data:[];
-    if(!films.length)throw new Error("empty");
-    initThree();
+    const response=await fetch("./films.json",{cache:"no-store"});
+    if(!response.ok)throw new Error("films.json");
+    const data=await response.json();
+    films=Array.isArray(data)?data:(Array.isArray(data.films)?data.films:[]);
+    films=films.filter(f=>f&&f.id!=null&&f.title);
+    rebuildForFilms();
     renderList();
-    loading.classList.add("hide");
   }catch(e){
-    loading.classList.add("hide");
-    empty.style.display="block";
+    films=[];
+    renderList();
+    panelContent.innerHTML=`<h1>영화 데이터를 불러올 수 없습니다.</h1><p style="color:#aaa;line-height:1.7">같은 폴더에 films.json이 있는지 확인하세요.</p>`;
+  }finally{
+    setTimeout(()=>loading.classList.add("hide"),180);
   }
 }
-loadFilms();
+
+function animate(){
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene,camera);
+}
+init();
+animate();
 </script>
 </body>
 </html>
