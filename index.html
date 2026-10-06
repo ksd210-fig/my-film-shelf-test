@@ -1,465 +1,1418 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>THE MOVIE CLOSET</title>
-<meta name="description" content="나만의 영화 클로짓. 책등 사이를 거닐며 영화를 발견하세요.">
-<meta property="og:title" content="THE MOVIE CLOSET">
-<meta property="og:description" content="나만의 영화 클로짓. 책등 사이를 거닐며 영화를 발견하세요.">
-<meta name="theme-color" content="#242424">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
-<style>
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#171717;color:#eee;font-family:Arial,"Noto Sans KR",sans-serif}
-body{touch-action:none}
-#app{position:fixed;inset:0}
-canvas{display:block}
-#topbar{position:fixed;z-index:20;top:18px;left:18px;right:18px;display:flex;align-items:center;justify-content:space-between;pointer-events:none}
-.group{display:flex;gap:8px;align-items:center;pointer-events:auto}
-button,input{font:inherit}
-button{border:1px solid rgba(255,255,255,.18);background:rgba(22,22,22,.78);backdrop-filter:blur(10px);color:#eee;border-radius:6px;padding:9px 13px;cursor:pointer;transition:.15s}
-button:hover{background:#eee;color:#171717}
-#searchWrap{display:flex;align-items:center;background:rgba(22,22,22,.82);border:1px solid rgba(255,255,255,.18);border-radius:6px;backdrop-filter:blur(10px);overflow:hidden}
-#search{width:230px;border:0;outline:0;background:transparent;color:#fff;padding:10px 12px}
-#search::placeholder{color:#999}
-#random{white-space:nowrap}
-#viewToggle button.active{background:#eee;color:#171717}
-#hint{position:fixed;z-index:8;left:50%;bottom:52px;transform:translateX(-50%);padding:7px 11px;background:rgba(15,15,15,.62);border:1px solid rgba(255,255,255,.12);border-radius:5px;color:#bbb;font-size:11px;letter-spacing:.04em;pointer-events:none}
-#credit{position:fixed;z-index:8;left:50%;bottom:10px;transform:translateX(-50%);font-size:9px;color:#777;white-space:nowrap;pointer-events:none}
-#tooltip{position:fixed;z-index:30;display:none;min-width:240px;max-width:340px;padding:10px 12px;background:#111;color:#eee;border:1px solid #555;border-radius:5px;box-shadow:0 10px 30px #000;pointer-events:none;font-size:12px;line-height:1.55}
-#tooltip strong{font-size:14px}
-#panel{position:fixed;z-index:25;top:0;right:0;width:min(430px,92vw);height:100%;background:rgba(20,20,20,.96);box-shadow:-25px 0 70px rgba(0,0,0,.45);transform:translateX(105%);transition:transform .32s cubic-bezier(.2,.8,.2,1);overflow:auto;padding:76px 34px 42px}
-#panel.open{transform:translateX(0)}
-#close{position:absolute;top:20px;right:20px;width:38px;height:38px;padding:0;font-size:23px}
-#panel .number{font-family:Georgia,serif;color:#999;font-size:12px;letter-spacing:.14em}
-#panel h1{margin:9px 0 3px;font-size:34px;line-height:1.12;font-weight:800}
-#panel .original{color:#aaa;font-size:15px;margin-bottom:24px}
-.detailGrid{display:grid;grid-template-columns:1fr 1fr;gap:15px 20px;border-top:1px solid #3c3c3c;border-bottom:1px solid #3c3c3c;padding:17px 0;margin-bottom:22px}
-.label{font-size:9px;color:#777;text-transform:uppercase;letter-spacing:.12em;margin-bottom:5px}
-.value{font-size:14px;color:#eee}
-.section{margin:22px 0}
-.section h3{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#777;margin:0 0 9px}
-.section p{font-size:14px;line-height:1.7;color:#ddd;margin:0}
-#tmdb{display:inline-block;color:#fff;border-bottom:1px solid #777;padding-bottom:2px;text-decoration:none}
-#listView{position:fixed;z-index:15;inset:70px 18px 28px;display:none;background:rgba(20,20,20,.96);border:1px solid #444;border-radius:7px;overflow:auto;padding:18px}
-.listRow{display:grid;grid-template-columns:70px 1fr 110px 80px;gap:15px;align-items:center;padding:13px 8px;border-bottom:1px solid #303030;cursor:pointer}
-.listRow:hover{background:#2b2b2b}
-.listNum{color:#888;font-family:monospace}
-.listTitle{font-weight:700}
-.listOriginal{color:#888;font-size:12px;margin-top:3px}
-.listDate,.listScore{color:#aaa;font-size:12px}
-.empty{padding:60px;text-align:center;color:#888}
-#loading{position:fixed;z-index:50;inset:0;background:#171717;display:grid;place-items:center;color:#aaa;font-size:12px;letter-spacing:.08em;transition:opacity .4s}
-#loading.hide{opacity:0;pointer-events:none}
-@media(max-width:700px){
- #topbar{top:10px;left:10px;right:10px;align-items:flex-start}
- #search{width:145px;padding:9px}
- #random{padding:9px}
- #viewToggle button{padding:9px 8px}
- #hint{bottom:44px;font-size:9px}
- #credit{bottom:7px;font-size:7px}
- #panel{width:94vw;padding:70px 24px 35px}
- #panel h1{font-size:29px}
- .listRow{grid-template-columns:50px 1fr 70px}
- .listDate{display:none}
-}
-</style>
-</head>
-<body>
-<div id="app"></div>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>영화 클로짓 — My Movie Closet</title>
+  <meta name="description" content="내 영화 컬렉션을 실제 클로짓처럼 둘러보고, 한 편씩 꺼내 보는 인터랙티브 영화 서재.">
+  <meta property="og:title" content="영화 클로짓 — My Movie Closet">
+  <meta property="og:description" content="내 영화 컬렉션을 실제 클로짓처럼 둘러보고, 한 편씩 꺼내 보세요.">
+  <meta name="theme-color" content="#191919">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text y='52' font-size='52'>🎬</text></svg>">
 
-<div id="topbar">
-  <div class="group">
-    <div id="searchWrap"><span style="padding-left:11px;color:#888">⌕</span><input id="search" placeholder="제목, 원제, 번호 검색"></div>
-    <button id="random">무작위로 꺼내기</button>
-  </div>
-  <div class="group" id="viewToggle">
-    <button id="closetBtn" class="active">클로짓 보기</button>
-    <button id="listBtn">목록 보기</button>
-  </div>
-</div>
+  <style>
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#202020;color:#f5f2eb;font-family:Arial,"Noto Sans KR",sans-serif}
+    body{touch-action:none}
+    #app{position:fixed;inset:0;width:100%;height:100%;background:#202020}
+    #closetView{position:absolute;inset:0;width:100%;height:100%;overflow:hidden}
+    #scene{position:absolute;inset:0;width:100%;height:100%}
+    canvas{display:block;width:100%;height:100%}
 
-<div id="hint">드래그하여 둘러보기 · 책등을 클릭하세요</div>
-<div id="credit">영화 정보: TMDB (This product uses the TMDB API but is not endorsed or certified by TMDB.)</div>
-<div id="tooltip"></div>
+    .topbar{
+      position:fixed;
+      z-index:20;
+      left:18px;
+      right:18px;
+      top:16px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      pointer-events:none
+    }
 
-<aside id="panel">
-  <button id="close">×</button>
-  <div id="panelContent"></div>
-</aside>
+    .tools,.views{
+      display:flex;
+      gap:7px;
+      pointer-events:auto
+    }
 
-<section id="listView"></section>
-<div id="loading">SHELVING THE COLLECTION…</div>
+    .ui-btn{
+      border:1px solid rgba(255,255,255,.25);
+      background:rgba(25,25,25,.84);
+      color:#fff;
+      border-radius:7px;
+      padding:8px 12px;
+      cursor:pointer;
+      backdrop-filter:blur(8px);
+      font-size:13px;
+      white-space:nowrap
+    }
 
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+    .ui-btn:hover{background:#fff;color:#111}
+    .ui-btn.active{background:#fff;color:#111}
+
+    #searchWrap{
+      display:none;
+      position:fixed;
+      z-index:30;
+      left:18px;
+      top:58px
+    }
+
+    #search{
+      width:245px;
+      padding:10px 12px;
+      border:1px solid #777;
+      border-radius:7px;
+      background:#151515;
+      color:#fff;
+      outline:none
+    }
+
+    #tooltip{
+      position:fixed;
+      z-index:50;
+      display:none;
+      pointer-events:none;
+      background:rgba(15,15,15,.94);
+      border:1px solid #555;
+      border-radius:7px;
+      padding:8px 11px;
+      color:#fff;
+      font-size:12px;
+      line-height:1.5;
+      box-shadow:0 6px 20px rgba(0,0,0,.3)
+    }
+
+    #tooltip strong{font-size:13px}
+
+    #detail{
+      position:fixed;
+      z-index:40;
+      right:0;
+      top:0;
+      width:min(430px,92vw);
+      max-width:100%;
+      height:100dvh;
+      min-height:100%;
+      background:rgba(20,20,20,.97);
+      border-left:1px solid #3e3e3e;
+      transform:translate3d(105%,0,0);
+      transition:transform .35s ease;
+      overflow-x:hidden;
+      overflow-y:auto;
+      padding:70px 28px 35px;
+      -webkit-overflow-scrolling:touch
+    }
+
+    #detail.open{transform:translate3d(0,0,0)}
+
+    #detailClose{
+      position:absolute;
+      right:18px;
+      top:18px
+    }
+
+    #detailColor{
+      width:100%;
+      height:8px;
+      border-radius:3px;
+      margin-bottom:22px
+    }
+
+    #detailNumber{
+      font-size:12px;
+      color:#aaa;
+      margin-bottom:7px
+    }
+
+    #detail h1{
+      font-size:30px;
+      line-height:1.2;
+      margin:0 0 7px;
+      word-break:keep-all
+    }
+
+    #detailOriginal{
+      color:#aaa;
+      font-size:15px;
+      margin-bottom:24px;
+      word-break:break-word
+    }
+
+    .meta{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px 18px;
+      margin-bottom:24px
+    }
+
+    .metaItem label{
+      display:block;
+      font-size:10px;
+      color:#777;
+      margin-bottom:4px;
+      text-transform:uppercase;
+      letter-spacing:.08em
+    }
+
+    .metaItem div{
+      font-size:14px;
+      word-break:keep-all
+    }
+
+    .score{
+      font-weight:bold;
+      color:#f1ca65
+    }
+
+    .section{
+      border-top:1px solid #383838;
+      padding-top:18px;
+      margin-top:18px
+    }
+
+    .section h3{
+      font-size:11px;
+      color:#888;
+      margin:0 0 8px;
+      text-transform:uppercase;
+      letter-spacing:.1em
+    }
+
+    .section p{
+      font-size:14px;
+      line-height:1.75;
+      color:#ddd;
+      margin:0;
+      word-break:keep-all
+    }
+
+    #tmdb{
+      display:inline-block;
+      margin-top:22px;
+      color:#fff;
+      text-decoration:none;
+      border:1px solid #555;
+      border-radius:6px;
+      padding:8px 11px;
+      font-size:12px
+    }
+
+    #tmdb:hover{
+      background:#fff;
+      color:#111
+    }
+
+    #listView{
+      position:absolute;
+      inset:0;
+      display:none;
+      background:#f0eee9;
+      color:#191919;
+      overflow:auto;
+      padding:86px 22px 60px
+    }
+
+    .listHead{
+      max-width:1200px;
+      margin:0 auto 18px;
+      display:flex;
+      align-items:end;
+      justify-content:space-between
+    }
+
+    .listHead h1{
+      margin:0;
+      font-size:28px
+    }
+
+    #count{
+      color:#777;
+      font-size:12px
+    }
+
+    #filmGrid{
+      max-width:1200px;
+      margin:auto;
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+      gap:10px
+    }
+
+    .filmCard{
+      position:relative;
+      min-height:220px;
+      padding:12px;
+      border-radius:5px;
+      overflow:hidden;
+      color:#111;
+      cursor:pointer;
+      border:1px solid rgba(0,0,0,.15)
+    }
+
+    .filmCard .n{
+      font-size:12px;
+      font-weight:bold;
+      margin-bottom:18px
+    }
+
+    .filmCard h2{
+      font-size:22px;
+      line-height:1.15;
+      margin:0;
+      word-break:keep-all
+    }
+
+    .filmCard p{
+      font-size:11px;
+      margin:10px 0 0;
+      color:#333
+    }
+
+    #empty{
+      display:none;
+      text-align:center;
+      padding:50px;
+      color:#777
+    }
+
+    #credit{
+      position:fixed;
+      z-index:10;
+      left:50%;
+      bottom:8px;
+      transform:translateX(-50%);
+      font-size:9px;
+      color:rgba(255,255,255,.52);
+      white-space:nowrap;
+      pointer-events:none
+    }
+
+    #hint{
+      position:fixed;
+      z-index:10;
+      left:50%;
+      bottom:34px;
+      transform:translateX(-50%);
+      font-size:11px;
+      color:rgba(255,255,255,.45);
+      pointer-events:none;
+      transition:opacity .4s
+    }
+
+    @media(max-width:600px){
+      html,body,#app,#closetView,#scene{
+        width:100%;
+        max-width:100%;
+      }
+
+      .topbar{
+        left:8px;
+        right:8px;
+        top:8px
+      }
+
+      .tools,.views{
+        gap:4px
+      }
+
+      .ui-btn{
+        padding:6px 8px;
+        font-size:11px;
+        border-radius:6px
+      }
+
+      #searchWrap{
+        left:8px;
+        top:45px
+      }
+
+      #search{
+        width:180px;
+        padding:8px 9px;
+        font-size:12px
+      }
+
+      #detail{
+        position:fixed;
+        left:0;
+        right:0;
+        top:0;
+        bottom:0;
+        width:100vw;
+        max-width:100vw;
+        height:100dvh;
+        min-height:100dvh;
+        padding:55px 19px 30px;
+        border-left:0;
+        border-right:0;
+        transform:translate3d(100%,0,0);
+        overflow-x:hidden;
+        overflow-y:auto;
+      }
+
+      #detail.open{
+        transform:translate3d(0,0,0)
+      }
+
+      #detail h1{
+        font-size:25px
+      }
+
+      #detailOriginal{
+        max-width:calc(100vw - 38px)
+      }
+
+      .meta{
+        gap:10px
+      }
+
+      #listView{
+        padding:62px 10px 45px
+      }
+
+      .listHead h1{
+        font-size:22px
+      }
+
+      #filmGrid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:7px
+      }
+
+      .filmCard{
+        min-height:170px;
+        padding:10px
+      }
+
+      .filmCard h2{
+        font-size:17px
+      }
+
+      #credit{
+        bottom:3px;
+        font-size:7px
+      }
+
+      #hint{
+        bottom:27px;
+        font-size:9px
+      }
+    }
+
+    @media(max-width:600px) and (orientation:landscape){
+      #detail{
+        padding-top:45px;
+      }
+    }
+  </style>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+    }
   }
-}
-</script>
+  </script>
+</head>
+
+<body>
+<div id="app">
+
+  <div id="closetView">
+    <div id="scene"></div>
+
+    <div class="topbar">
+      <div class="tools">
+        <button class="ui-btn" id="searchBtn">검색</button>
+        <button class="ui-btn" id="randomBtn">무작위로 꺼내기</button>
+      </div>
+
+      <div class="views">
+        <button class="ui-btn active" id="closetBtn">클로짓 보기</button>
+        <button class="ui-btn" id="listBtn">목록 보기</button>
+      </div>
+    </div>
+
+    <div id="searchWrap">
+      <input id="search" type="search" placeholder="제목 검색">
+    </div>
+
+    <div id="tooltip"></div>
+
+    <div id="hint">
+      드래그해서 둘러보기 · 책등을 클릭해 꺼내기
+    </div>
+  </div>
+
+  <div id="listView">
+    <div class="listHead">
+      <h1>내 영화 클로짓</h1>
+      <span id="count"></span>
+    </div>
+
+    <div id="filmGrid"></div>
+
+    <div id="empty">
+      검색 결과가 없습니다.
+    </div>
+  </div>
+
+  <aside id="detail">
+    <button class="ui-btn" id="detailClose">닫기</button>
+
+    <div id="detailColor"></div>
+
+    <div id="detailNumber"></div>
+
+    <h1 id="detailTitle"></h1>
+
+    <div id="detailOriginal"></div>
+
+    <div class="meta">
+      <div class="metaItem">
+        <label>개봉일</label>
+        <div id="detailRelease"></div>
+      </div>
+
+      <div class="metaItem">
+        <label>평점</label>
+        <div id="detailScore" class="score"></div>
+      </div>
+
+      <div class="metaItem">
+        <label>장르</label>
+        <div id="detailGenres"></div>
+      </div>
+
+      <div class="metaItem">
+        <label>투표 수</label>
+        <div id="detailVotes"></div>
+      </div>
+    </div>
+
+    <div class="section" id="overviewSection">
+      <h3>줄거리</h3>
+      <p id="detailOverview"></p>
+    </div>
+
+    <div class="section" id="noteSection">
+      <h3>한 줄 감상</h3>
+      <p id="detailNote"></p>
+    </div>
+
+    <a id="tmdb" href="#" target="_blank" rel="noopener">
+      TMDB에서 보기 ↗
+    </a>
+  </aside>
+
+  <div id="credit">
+    영화 정보: TMDB (This product uses the TMDB API but is not endorsed or certified by TMDB.)
+  </div>
+
+</div>
 
 <script type="module">
 import * as THREE from "three";
-import {OrbitControls} from "three/addons/controls/OrbitControls.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
-const app=document.getElementById("app");
-const tooltip=document.getElementById("tooltip");
-const panel=document.getElementById("panel");
-const panelContent=document.getElementById("panelContent");
-const listView=document.getElementById("listView");
-const search=document.getElementById("search");
-const loading=document.getElementById("loading");
+const sceneEl = document.getElementById("scene");
+const closetView = document.getElementById("closetView");
+const listView = document.getElementById("listView");
+const tooltip = document.getElementById("tooltip");
+const detail = document.getElementById("detail");
+const searchWrap = document.getElementById("searchWrap");
+const searchInput = document.getElementById("search");
+const filmGrid = document.getElementById("filmGrid");
+const empty = document.getElementById("empty");
+const count = document.getElementById("count");
 
-let films=[];
-let selected=null;
-let rayTargets=[];
-let fakeTargets=[];
-let allBooks=[];
-let shelfGroup=new THREE.Group();
+let films = [];
+let allBooks = [];
+let selectedFilm = null;
+let selectedMesh = null;
 
-const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x181818);
+const renderer = new THREE.WebGLRenderer({
+  antialias:true
+});
 
-const camera=new THREE.PerspectiveCamera(54,innerWidth/innerHeight,.1,100);
-camera.position.set(0,2.15,7.1);
-
-const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-renderer.setSize(innerWidth,innerHeight);
-renderer.outputColorSpace=THREE.SRGBColorSpace;
-renderer.shadowMap.enabled=false;
-app.appendChild(renderer.domElement);
+renderer.setSize(
+  closetView.clientWidth,
+  closetView.clientHeight
+);
+renderer.setClearColor(0x252525,1);
+sceneEl.appendChild(renderer.domElement);
 
-const ambient=new THREE.AmbientLight(0xffffff,2.7);
-scene.add(ambient);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x252525);
 
-const controls=new OrbitControls(camera,renderer.domElement);
-controls.enableDamping=true;
-controls.dampingFactor=.075;
-controls.enablePan=false;
-controls.enableZoom=false;
-controls.minPolarAngle=1.25;
-controls.maxPolarAngle=1.92;
-controls.target.set(0,2.15,0);
-controls.rotateSpeed=.34;
+const camera = new THREE.PerspectiveCamera(
+  55,
+  closetView.clientWidth / closetView.clientHeight,
+  .1,
+  100
+);
 
-const room=new THREE.Group();
+camera.position.set(0,2.9,7.8);
+
+const controls = new OrbitControls(
+  camera,
+  renderer.domElement
+);
+
+controls.enableDamping = true;
+controls.dampingFactor = .075;
+controls.enablePan = false;
+controls.minDistance = 6.4;
+controls.maxDistance = 9.4;
+controls.minPolarAngle = Math.PI * .36;
+controls.maxPolarAngle = Math.PI * .64;
+controls.minAzimuthAngle = -Math.PI * .55;
+controls.maxAzimuthAngle = Math.PI * .55;
+controls.target.set(0,2.9,0);
+
+scene.add(
+  new THREE.HemisphereLight(
+    0xffffff,
+    0xffffff,
+    2.6
+  )
+);
+
+const room = new THREE.Group();
 scene.add(room);
-room.add(shelfGroup);
 
-const wallMat=new THREE.MeshBasicMaterial({color:0x202020});
-const floorMat=new THREE.MeshBasicMaterial({color:0x252525});
+const shelfMat = new THREE.MeshBasicMaterial({
+  color:0x3a3a3a
+});
 
-const backWall=new THREE.Mesh(new THREE.PlaneGeometry(18,9),wallMat);
-backWall.position.set(0,4,-3.4);
-room.add(backWall);
+const floorMat = new THREE.MeshBasicMaterial({
+  color:0x303030
+});
 
-const floor=new THREE.Mesh(new THREE.PlaneGeometry(18,14),floorMat);
-floor.rotation.x=-Math.PI/2;
-floor.position.set(0,0,-.5);
-room.add(floor);
+function box(w,h,d,x,y,z,mat=shelfMat){
+  const m = new THREE.Mesh(
+    new THREE.BoxGeometry(w,h,d),
+    mat
+  );
 
-const leftWall=new THREE.Mesh(new THREE.PlaneGeometry(9,9),wallMat);
-leftWall.rotation.y=Math.PI/2;
-leftWall.position.set(-4.45,4,.7);
-room.add(leftWall);
+  m.position.set(x,y,z);
+  room.add(m);
 
-const rightWall=new THREE.Mesh(new THREE.PlaneGeometry(9,9),wallMat);
-rightWall.rotation.y=-Math.PI/2;
-rightWall.position.set(4.45,4,.7);
-room.add(rightWall);
-
-function makeTextTexture(text,bg,fg="#111",size=70){
-  const c=document.createElement("canvas");
-  c.width=256;c.height=512;
-  const x=c.getContext("2d");
-  x.fillStyle=bg;x.fillRect(0,0,c.width,c.height);
-  x.fillStyle=fg;
-  x.font="900 52px Arial, sans-serif";
-  x.textAlign="center";
-  x.textBaseline="middle";
-  x.save();
-  x.translate(128,300);
-  x.rotate(-Math.PI/2);
-  x.fillText(text.slice(0,13),0,0);
-  x.restore();
-  return new THREE.CanvasTexture(c);
+  return m;
 }
 
-function makeSpine({title,id,color,isFilm=false}){
-  const width=isFilm?.54:.23;
-  const h=1.02;
-  const g=new THREE.Group();
+box(13,.16,8,0,0,0,floorMat);
+box(13,.18,.18,0,6.15,0);
+box(.18,6.2,8,-6.4,3.1,0);
+box(.18,6.2,8,6.4,3.1,0);
 
-  const mat=new THREE.MeshBasicMaterial({color:new THREE.Color(color)});
-  const body=new THREE.Mesh(new THREE.BoxGeometry(width,h,.18),mat);
-  body.position.y=h/2;
-  g.add(body);
+function makeWallShelves(side){
+  const x =
+    side === "left" ? -3.7 :
+    side === "right" ? 3.7 :
+    0;
 
-  const badgeCanvas=document.createElement("canvas");
-  badgeCanvas.width=256;badgeCanvas.height=130;
-  const bx=badgeCanvas.getContext("2d");
-  bx.fillStyle=color;bx.fillRect(0,0,256,130);
-  bx.fillStyle=new THREE.Color(color).getHSL({}).l>.52?"#111":"#fff";
-  bx.font="900 54px Arial";
-  bx.textAlign="center";
-  bx.textBaseline="middle";
-  bx.fillText("#"+String(id).padStart(3,"0"),128,66);
-  const badgeTex=new THREE.CanvasTexture(badgeCanvas);
-  const badge=new THREE.Mesh(new THREE.PlaneGeometry(width*.9,.17),new THREE.MeshBasicMaterial({map:badgeTex,transparent:true}));
-  badge.position.set(0,.88,.096);
-  g.add(badge);
+  const horizontal = side === "front";
 
-  const titleTex=makeTextTexture(title,color,new THREE.Color(color).getHSL({}).l>.52?"#111":"#fff");
-  const titleMesh=new THREE.Mesh(new THREE.PlaneGeometry(width*.8,.83),new THREE.MeshBasicMaterial({map:titleTex,transparent:true}));
-  titleMesh.position.set(0,.43,.097);
-  g.add(titleMesh);
+  for(let i=0;i<8;i++){
+    const y = .45 + i*.78;
 
-  g.userData={film:isFilm?films.find(f=>f.id===id):null,id,title};
-  return g;
-}
-
-const fakeColors=["#f3f0e7","#fffdf6","#d7d7d4","#a93d3a","#24364e","#28747b","#b28a28","#ebe5d6","#55595b"];
-const fakeTitles=["THE ART OF CINEMA","MOTION PICTURES","FILM HISTORY","MODERN CLASSICS","VISIONS","THE DIRECTORS","WORLD CINEMA","SCREEN","THE MOVIE BOOK","FILM NOTES"];
-
-function addShelf(x,rotY,filmSide=false){
-  const wall=new THREE.Group();
-  wall.position.x=x;
-  wall.rotation.y=rotY;
-  shelfGroup.add(wall);
-
-  const shelfWidth=7.8;
-  const shelfDepth=.43;
-  const shelfLevels=[.72,1.72,2.72,3.72,4.72,5.72,6.72];
-
-  for(let i=0;i<7;i++){
-    const board=new THREE.Mesh(new THREE.BoxGeometry(shelfWidth,shelfDepth,.5),new THREE.MeshBasicMaterial({color:0x343434}));
-    board.position.set(0,shelfLevels[i]-.11,-.03);
-    wall.add(board);
-
-    const back=new THREE.Mesh(new THREE.BoxGeometry(shelfWidth,.95,.12),new THREE.MeshBasicMaterial({color:0x292929}));
-    back.position.set(0,shelfLevels[i]+.37,-.27);
-    wall.add(back);
-
-    let cursor=-shelfWidth/2+.12;
-    if(filmSide && i===3 && films.length){
-      const gap=Math.min(.06,(shelfWidth-.3)/Math.max(films.length,1)*.18);
-      const usable=shelfWidth-.25;
-      const fw=Math.min(.58,usable/Math.max(films.length,1)-gap);
-      const total=films.length*fw+(films.length-1)*gap;
-      cursor=-total/2;
-      films.forEach(f=>{
-        const book=makeSpine({title:f.title,id:f.id,color:f.color||fakeColors[Math.floor(Math.random()*fakeColors.length)],isFilm:true});
-        book.scale.y=.94;
-        book.position.set(cursor+fw/2,shelfLevels[i],.02);
-        book.scale.x=fw/.54;
-        wall.add(book);
-        rayTargets.push(book);
-        allBooks.push(book);
-        cursor+=fw+gap;
-      });
-      while(cursor<shelfWidth/2-.05){
-        const w=.17+Math.random()*.12;
-        const b=makeSpine({title:fakeTitles[Math.floor(Math.random()*fakeTitles.length)],id:1000+fakeTargets.length,color:fakeColors[Math.floor(Math.random()*fakeColors.length)]});
-        b.scale.x=w/.23;
-        b.position.set(cursor+w/2,shelfLevels[i],.02);
-        wall.add(b);fakeTargets.push(b);allBooks.push(b);cursor+=w+.025;
-      }
+    if(horizontal){
+      box(
+        12.6,
+        .12,
+        .32,
+        0,
+        y,
+        -3.9
+      );
     }else{
-      while(cursor<shelfWidth/2-.05){
-        const w=.13+Math.random()*.14;
-        const b=makeSpine({title:fakeTitles[Math.floor(Math.random()*fakeTitles.length)],id:1000+fakeTargets.length,color:fakeColors[Math.floor(Math.random()*fakeColors.length)]});
-        b.scale.x=w/.23;
-        b.position.set(cursor+w/2,shelfLevels[i],.02);
-        wall.add(b);fakeTargets.push(b);allBooks.push(b);cursor+=w+.025;
-      }
+      box(
+        .32,
+        .12,
+        7.8,
+        x,
+        y,
+        0
+      );
     }
   }
 }
 
-addShelf(-4.05,Math.PI/2,false);
-addShelf(4.05,-Math.PI/2,true);
+makeWallShelves("front");
+makeWallShelves("left");
+makeWallShelves("right");
 
-function rebuildForFilms(){
-  while(shelfGroup.children.length)shelfGroup.remove(shelfGroup.children[0]);
-  rayTargets=[];fakeTargets=[];allBooks=[];
-  addShelf(-4.05,Math.PI/2,false);
-  addShelf(4.05,-Math.PI/2,true);
+const fakeColors = [
+  0xf4f1e8,
+  0xe7dfce,
+  0xbdbdb8,
+  0x9b2929,
+  0x203b62,
+  0x2c7375,
+  0xb59b35
+];
+
+function createSpine(
+  text,
+  color,
+  width=.26,
+  height=.66,
+  depth=.16,
+  isReal=false
+){
+  const group = new THREE.Group();
+
+  const mat = new THREE.MeshBasicMaterial({
+    color
+  });
+
+  const body = new THREE.Mesh(
+    new THREE.BoxGeometry(
+      width,
+      height,
+      depth
+    ),
+    mat
+  );
+
+  group.add(body);
+
+  const canvas = document.createElement("canvas");
+
+  canvas.width = 128;
+  canvas.height = 420;
+
+  const ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 38px Arial";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+
+  ctx.fillText(
+    "#" + String(text).padStart(3,"0"),
+    64,
+    10
+  );
+
+  ctx.fillStyle = "#222222";
+  ctx.font = isReal
+    ? "bold 25px Arial"
+    : "bold 20px Arial";
+
+  ctx.save();
+
+  ctx.translate(64,245);
+  ctx.rotate(-Math.PI/2);
+
+  ctx.fillText(
+    String(text).slice(0,15),
+    0,
+    0
+  );
+
+  ctx.restore();
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+
+  const label = new THREE.Mesh(
+    new THREE.PlaneGeometry(
+      width*.96,
+      height*.96
+    ),
+    new THREE.MeshBasicMaterial({
+      map:tex,
+      transparent:true
+    })
+  );
+
+  label.position.z = depth/2+.002;
+
+  group.add(label);
+
+  group.userData = {
+    film:null,
+    isReal
+  };
+
+  return group;
 }
 
-function dateText(s){
-  if(!s)return "—";
-  const p=s.split("-");
-  return p.length===3?`${p[0]}.${p[1]}.${p[2]}`:s;
+function fillShelf(side,row,items){
+  const y = .45 + row*.78;
+
+  const isFront = side === "front";
+
+  const shelfLength = isFront
+    ? 12.45
+    : 7.45;
+
+  const countBooks = Math.floor(
+    shelfLength/.31
+  );
+
+  const start =
+    -shelfLength/2+.17;
+
+  for(let i=0;i<countBooks;i++){
+
+    const film =
+      isFront &&
+      row === 3 &&
+      i >= Math.floor(
+        (countBooks-items.length)/2
+      ) &&
+      i <
+        Math.floor(
+          (countBooks-items.length)/2
+        ) + items.length
+        ? items[
+            i -
+            Math.floor(
+              (countBooks-items.length)/2
+            )
+          ]
+        : null;
+
+    const n = film
+      ? film.id
+      : 1000 + row*100 + i;
+
+    const title = film
+      ? film.title
+      : [
+          "The Last Archive",
+          "Midnight Signal",
+          "Blue Horizon",
+          "North Station",
+          "Invisible City",
+          "The Long Way Home",
+          "Silver River"
+        ][i%7];
+
+    const color = film
+      ? new THREE.Color(film.color)
+      : new THREE.Color(
+          fakeColors[i%fakeColors.length]
+        );
+
+    const spine = createSpine(
+      title,
+      color.getHex(),
+      .28,
+      .67,
+      .18,
+      !!film
+    );
+
+    spine.userData.film = film;
+
+    if(isFront){
+
+      spine.position.set(
+        start+i*.31,
+        y,
+        -3.69
+      );
+
+    }else{
+
+      spine.position.set(
+        side === "left"
+          ? -3.52
+          : 3.52,
+        y,
+        -3.7+i*.31
+      );
+
+      spine.rotation.y =
+        side === "left"
+          ? Math.PI/2
+          : -Math.PI/2;
+    }
+
+    room.add(spine);
+    allBooks.push(spine);
+  }
 }
 
-function scoreText(f){
-  return typeof f.score==="number"?`${f.score.toFixed(1)} / 10 (${Number(f.votes||0).toLocaleString()}표)`:"—";
+for(let r=0;r<7;r++){
+  fillShelf("front",r,films);
+  fillShelf("left",r,[]);
+  fillShelf("right",r,[]);
 }
 
-function showFilm(f){
-  if(!f)return;
-  selected=f;
-  const genres=Array.isArray(f.genres)&&f.genres.length?f.genres.join(" · "):"—";
-  panelContent.innerHTML=`
-    <div class="number">SPINE #${String(f.id).padStart(3,"0")}</div>
-    <h1>${escapeHTML(f.title||"")}</h1>
-    <div class="original">${escapeHTML(f.original||"")}</div>
-    <div class="detailGrid">
-      <div><div class="label">개봉일</div><div class="value">${escapeHTML(dateText(f.release))}</div></div>
-      <div><div class="label">장르</div><div class="value">${escapeHTML(genres)}</div></div>
-      <div><div class="label">TMDB 평점</div><div class="value">${escapeHTML(scoreText(f))}</div></div>
-      <div><div class="label">번호</div><div class="value">#${String(f.id).padStart(3,"0")}</div></div>
-    </div>
-    ${f.overview?`<div class="section"><h3>줄거리</h3><p>${escapeHTML(f.overview)}</p></div>`:""}
-    ${f.note?`<div class="section"><h3>한 줄 감상</h3><p>${escapeHTML(f.note)}</p></div>`:""}
-    ${f.tmdb?`<div class="section"><h3>TMDB</h3><a id="tmdb" href="${safeUrl(f.tmdb)}" target="_blank" rel="noopener noreferrer">TMDB에서 보기 ↗</a></div>`:""}
-  `;
-  panel.classList.add("open");
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+
+function pointerPosition(e){
+  const rect =
+    renderer.domElement.getBoundingClientRect();
+
+  pointer.x =
+    ((e.clientX-rect.left)/rect.width)*2-1;
+
+  pointer.y =
+    -((e.clientY-rect.top)/rect.height)*2+1;
 }
 
-function escapeHTML(s){
-  return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+function bookAt(e){
+
+  pointerPosition(e);
+
+  raycaster.setFromCamera(
+    pointer,
+    camera
+  );
+
+  const hits =
+    raycaster.intersectObjects(
+      allBooks,
+      true
+    );
+
+  if(!hits.length)return null;
+
+  let o = hits[0].object;
+
+  while(
+    o.parent &&
+    !allBooks.includes(o)
+  ){
+    o = o.parent;
+  }
+
+  return o;
 }
 
-function safeUrl(s){
-  try{
-    const u=new URL(s);
-    return u.protocol==="https:"&&u.hostname==="www.themoviedb.org"?u.href:"#";
-  }catch{return "#"}
-}
+renderer.domElement.addEventListener(
+  "pointermove",
+  e => {
 
-function showTooltip(f,x,y){
-  tooltip.innerHTML=`<strong>#${String(f.id).padStart(3,"0")} · ${escapeHTML(f.title)}</strong><br>개봉일 ${escapeHTML(dateText(f.release))} · 평점 ${escapeHTML(f.score??"—")}`;
-  tooltip.style.display="block";
-  tooltip.style.left=Math.min(x+15,innerWidth-350)+"px";
-  tooltip.style.top=Math.min(y+15,innerHeight-75)+"px";
-}
+    const book = bookAt(e);
 
-function hideTooltip(){tooltip.style.display="none"}
+    if(book && book.userData.film){
 
-function renderList(items=films){
-  listView.innerHTML=items.length?items.map(f=>`
-    <div class="listRow" data-id="${f.id}">
-      <div class="listNum">#${String(f.id).padStart(3,"0")}</div>
-      <div><div class="listTitle">${escapeHTML(f.title)}</div><div class="listOriginal">${escapeHTML(f.original||"")}</div></div>
-      <div class="listDate">${escapeHTML(dateText(f.release))}</div>
-      <div class="listScore">${escapeHTML(f.score??"—")}</div>
-    </div>
-  `).join(""):`<div class="empty">검색 결과가 없습니다.</div>`;
-  listView.querySelectorAll(".listRow").forEach(row=>row.addEventListener("click",()=>showFilm(films.find(f=>f.id==row.dataset.id))));
-}
+      const f = book.userData.film;
 
-function setView(type){
-  const closet=type==="closet";
-  listView.style.display=closet?"none":"block";
-  renderer.domElement.style.display=closet?"block":"none";
-  document.getElementById("closetBtn").classList.toggle("active",closet);
-  document.getElementById("listBtn").classList.toggle("active",!closet);
-}
+      tooltip.style.display = "block";
 
-const raycaster=new THREE.Raycaster();
-const pointer=new THREE.Vector2();
+      tooltip.innerHTML =
+        `<strong>#${String(f.id).padStart(3,"0")} · ${escapeHtml(f.title)}</strong><br>` +
+        `${escapeHtml(f.release)} · ★ ${Number(f.score).toFixed(1)}`;
 
-function pointerFromEvent(e){
-  const r=renderer.domElement.getBoundingClientRect();
-  pointer.x=((e.clientX-r.left)/r.width)*2-1;
-  pointer.y=-((e.clientY-r.top)/r.height)*2+1;
-}
+      tooltip.style.left =
+        Math.min(
+          e.clientX+14,
+          innerWidth-230
+        ) + "px";
 
-renderer.domElement.addEventListener("pointermove",e=>{
-  if(e.pointerType==="touch")return;
-  pointerFromEvent(e);
-  raycaster.setFromCamera(pointer,camera);
-  const hits=raycaster.intersectObjects(rayTargets,true);
-  if(hits.length){
-    let o=hits[0].object;
-    while(o&&!o.userData.film)o=o.parent;
-    if(o?.userData.film){
-      showTooltip(o.userData.film,e.clientX,e.clientY);
-      renderer.domElement.style.cursor="pointer";
-      return;
+      tooltip.style.top =
+        Math.min(
+          e.clientY+14,
+          innerHeight-75
+        ) + "px";
+
+      renderer.domElement.style.cursor =
+        "pointer";
+
+    }else{
+
+      tooltip.style.display = "none";
+
+      renderer.domElement.style.cursor =
+        "grab";
     }
   }
-  hideTooltip();
-  renderer.domElement.style.cursor="grab";
-});
+);
 
-renderer.domElement.addEventListener("pointerleave",hideTooltip);
+renderer.domElement.addEventListener(
+  "pointerleave",
+  () => {
+    tooltip.style.display = "none";
+  }
+);
 
-renderer.domElement.addEventListener("click",e=>{
-  pointerFromEvent(e);
-  raycaster.setFromCamera(pointer,camera);
-  const hits=raycaster.intersectObjects(rayTargets,true);
-  if(!hits.length)return;
-  let o=hits[0].object;
-  while(o&&!o.userData.film)o=o.parent;
-  if(o?.userData.film)showFilm(o.userData.film);
-});
+renderer.domElement.addEventListener(
+  "click",
+  e => {
 
-renderer.domElement.addEventListener("pointerdown",()=>renderer.domElement.style.cursor="grabbing");
-renderer.domElement.addEventListener("pointerup",()=>renderer.domElement.style.cursor="grab");
+    const book = bookAt(e);
 
-search.addEventListener("input",()=>{
-  const q=search.value.trim().toLowerCase();
-  const filtered=films.filter(f=>String(f.id).includes(q)||(f.title||"").toLowerCase().includes(q)||(f.original||"").toLowerCase().includes(q));
-  if(q){
-    const matches=new Set(filtered.map(f=>f.id));
-    rayTargets.forEach(o=>o.visible=matches.has(o.userData.id));
-  }else rayTargets.forEach(o=>o.visible=true);
-  renderList(filtered);
-});
+    if(
+      book &&
+      book.userData.film
+    ){
+      openFilm(
+        book.userData.film,
+        book
+      );
+    }
+  }
+);
 
-document.getElementById("random").addEventListener("click",()=>{
+function openFilm(film,mesh=null){
+
+  selectedFilm = film;
+  selectedMesh = mesh;
+
+  document.getElementById(
+    "detailColor"
+  ).style.background = film.color;
+
+  document.getElementById(
+    "detailNumber"
+  ).textContent =
+    "#" + String(film.id).padStart(3,"0");
+
+  document.getElementById(
+    "detailTitle"
+  ).textContent = film.title;
+
+  document.getElementById(
+    "detailOriginal"
+  ).textContent = film.original;
+
+  document.getElementById(
+    "detailRelease"
+  ).textContent = film.release;
+
+  document.getElementById(
+    "detailScore"
+  ).textContent =
+    `${Number(film.score).toFixed(1)} / 10`;
+
+  document.getElementById(
+    "detailGenres"
+  ).textContent =
+    Array.isArray(film.genres)
+      ? film.genres.join(" · ")
+      : "";
+
+  document.getElementById(
+    "detailVotes"
+  ).textContent =
+    Number(film.votes).toLocaleString();
+
+  setOptional(
+    "overviewSection",
+    "detailOverview",
+    film.overview
+  );
+
+  setOptional(
+    "noteSection",
+    "detailNote",
+    film.note
+  );
+
+  const link =
+    document.getElementById("tmdb");
+
+  link.href = film.tmdb;
+
+  detail.classList.add("open");
+}
+
+function setOptional(
+  sectionId,
+  textId,
+  value
+){
+
+  const section =
+    document.getElementById(sectionId);
+
+  if(
+    value &&
+    String(value).trim()
+  ){
+
+    section.style.display = "";
+
+    document.getElementById(
+      textId
+    ).textContent = value;
+
+  }else{
+
+    section.style.display = "none";
+  }
+}
+
+function closeFilm(){
+
+  detail.classList.remove("open");
+
+  selectedFilm = null;
+  selectedMesh = null;
+}
+
+document.getElementById(
+  "detailClose"
+).onclick = closeFilm;
+
+document.getElementById(
+  "searchBtn"
+).onclick = () => {
+
+  searchWrap.style.display =
+    searchWrap.style.display === "block"
+      ? "none"
+      : "block";
+
+  if(
+    searchWrap.style.display === "block"
+  ){
+    searchInput.focus();
+  }
+};
+
+searchInput.addEventListener(
+  "input",
+  () => {
+
+    const q =
+      searchInput.value
+        .trim()
+        .toLowerCase();
+
+    if(
+      listView.style.display === "block"
+    ){
+
+      renderList(q);
+
+    }else{
+
+      allBooks.forEach(b => {
+
+        if(!b.userData.film)return;
+
+        const f = b.userData.film;
+
+        const match =
+          !q ||
+          f.title
+            .toLowerCase()
+            .includes(q) ||
+          f.original
+            .toLowerCase()
+            .includes(q);
+
+        b.visible = match;
+      });
+    }
+  }
+);
+
+document.getElementById(
+  "randomBtn"
+).onclick = () => {
+
   if(!films.length)return;
-  const f=films[Math.floor(Math.random()*films.length)];
-  showFilm(f);
-});
 
-document.getElementById("close").addEventListener("click",()=>panel.classList.remove("open"));
-document.getElementById("closetBtn").addEventListener("click",()=>setView("closet"));
-document.getElementById("listBtn").addEventListener("click",()=>setView("list"));
+  const f =
+    films[
+      Math.floor(
+        Math.random()*films.length
+      )
+    ];
 
-window.addEventListener("keydown",e=>{
-  if(e.key==="/"){e.preventDefault();search.focus()}
-  if(e.key.toLowerCase()==="r"&&!e.metaKey&&!e.ctrlKey)document.getElementById("random").click();
-  if(e.key==="Escape"){panel.classList.remove("open");search.blur()}
-});
+  const book =
+    allBooks.find(
+      b =>
+        b.userData.film &&
+        b.userData.film.id === f.id
+    );
 
-window.addEventListener("resize",()=>{
-  camera.aspect=innerWidth/innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth,innerHeight);
-});
+  if(book){
 
-async function init(){
-  try{
-    const response=await fetch("./films.json",{cache:"no-store"});
-    if(!response.ok)throw new Error("films.json");
-    const data=await response.json();
-    films=Array.isArray(data)?data:(Array.isArray(data.films)?data.films:[]);
-    films=films.filter(f=>f&&f.id!=null&&f.title);
-    rebuildForFilms();
-    renderList();
-  }catch(e){
-    films=[];
-    renderList();
-    panelContent.innerHTML=`<h1>영화 데이터를 불러올 수 없습니다.</h1><p style="color:#aaa;line-height:1.7">같은 폴더에 films.json이 있는지 확인하세요.</p>`;
-  }finally{
-    setTimeout(()=>loading.classList.add("hide"),180);
+    openFilm(f,book);
+
+    controls.target.set(
+      book.position.x,
+      book.position.y,
+      book.position.z
+    );
   }
+};
+
+document.getElementById(
+  "closetBtn"
+).onclick = () => {
+
+  closetView.style.display = "block";
+  listView.style.display = "none";
+
+  document.getElementById(
+    "closetBtn"
+  ).classList.add("active");
+
+  document.getElementById(
+    "listBtn"
+  ).classList.remove("active");
+};
+
+document.getElementById(
+  "listBtn"
+).onclick = () => {
+
+  closetView.style.display = "none";
+  listView.style.display = "block";
+
+  document.getElementById(
+    "listBtn"
+  ).classList.add("active");
+
+  document.getElementById(
+    "closetBtn"
+  ).classList.remove("active");
+
+  renderList(
+    searchInput.value
+      .trim()
+      .toLowerCase()
+  );
+};
+
+function renderList(q=""){
+
+  const visible =
+    films.filter(
+      f =>
+        !q ||
+        f.title
+          .toLowerCase()
+          .includes(q) ||
+        f.original
+          .toLowerCase()
+          .includes(q)
+    );
+
+  count.textContent =
+    `${visible.length}편`;
+
+  filmGrid.innerHTML = "";
+
+  empty.style.display =
+    visible.length
+      ? "none"
+      : "block";
+
+  visible.forEach(f => {
+
+    const card =
+      document.createElement("article");
+
+    card.className = "filmCard";
+
+    card.style.background =
+      f.color;
+
+    card.innerHTML =
+      `<div class="n">#${String(f.id).padStart(3,"0")}</div>` +
+      `<h2>${escapeHtml(f.title)}</h2>` +
+      `<p>${escapeHtml(f.release)} · ★ ${Number(f.score).toFixed(1)}</p>`;
+
+    card.onclick = () =>
+      openFilm(f);
+
+    filmGrid.appendChild(card);
+  });
+}
+
+function escapeHtml(s){
+
+  return String(s ?? "")
+    .replace(
+      /[&<>"']/g,
+      c =>
+        ({
+          "&":"&amp;",
+          "<":"&lt;",
+          ">":"&gt;",
+          '"':"&quot;",
+          "'":"&#039;"
+        }[c])
+    );
+}
+
+function resize(){
+
+  const w =
+    closetView.clientWidth;
+
+  const h =
+    closetView.clientHeight;
+
+  camera.aspect = w/h;
+
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(w,h);
+}
+
+window.addEventListener(
+  "resize",
+  resize
+);
+
+async function loadFilms(){
+
+  try{
+
+    const res =
+      await fetch(
+        "./films.json",
+        {cache:"no-store"}
+      );
+
+    if(!res.ok){
+      throw new Error("films.json");
+    }
+
+    const data =
+      await res.json();
+
+    films =
+      Array.isArray(data)
+        ? data
+        : [];
+
+  }catch(e){
+
+    films = [];
+  }
+
+  allBooks.forEach(
+    b => room.remove(b)
+  );
+
+  allBooks = [];
+
+  for(let r=0;r<7;r++){
+
+    fillShelf(
+      "front",
+      r,
+      films
+    );
+
+    fillShelf(
+      "left",
+      r,
+      []
+    );
+
+    fillShelf(
+      "right",
+      r,
+      []
+    );
+  }
+
+  renderList();
 }
 
 function animate(){
-  requestAnimationFrame(animate);
+
+  requestAnimationFrame(
+    animate
+  );
+
   controls.update();
-  renderer.render(scene,camera);
+
+  renderer.render(
+    scene,
+    camera
+  );
 }
-init();
+
+loadFilms();
 animate();
+
+setTimeout(
+  () => {
+    document.getElementById(
+      "hint"
+    ).style.opacity = "0";
+  },
+  4500
+);
+
+let touchStartX = 0;
+let touchStartY = 0;
+
+renderer.domElement.addEventListener(
+  "touchstart",
+  e => {
+
+    if(e.touches.length === 1){
+
+      touchStartX =
+        e.touches[0].clientX;
+
+      touchStartY =
+        e.touches[0].clientY;
+    }
+  },
+  {passive:true}
+);
+
+renderer.domElement.addEventListener(
+  "touchend",
+  e => {
+
+    if(
+      e.changedTouches.length !== 1
+    )return;
+
+    const dx =
+      Math.abs(
+        e.changedTouches[0].clientX -
+        touchStartX
+      );
+
+    const dy =
+      Math.abs(
+        e.changedTouches[0].clientY -
+        touchStartY
+      );
+
+    if(dx < 8 && dy < 8){
+
+      const fakeEvent = {
+        clientX:
+          e.changedTouches[0].clientX,
+        clientY:
+          e.changedTouches[0].clientY
+      };
+
+      const book =
+        bookAt(fakeEvent);
+
+      if(
+        book &&
+        book.userData.film
+      ){
+
+        openFilm(
+          book.userData.film,
+          book
+        );
+      }
+    }
+  },
+  {passive:true}
+);
 </script>
 </body>
 </html>
